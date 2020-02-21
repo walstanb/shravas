@@ -1,2 +1,2 @@
 # shravas
-DJI TELLO Automated delivery flight controller. 
+DJI Tello Automated Delivery flight controller. 
