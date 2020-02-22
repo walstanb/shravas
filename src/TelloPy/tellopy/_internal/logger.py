@@ -24,7 +24,7 @@ class Logger(object): #Object inheritence for child 'RospyLogger' (Jordy)
 
     def output(self, msg):
         self.lock.acquire()
-        #print(msg)
+        print(msg)
         self.lock.release()
 
     def error(self, str):

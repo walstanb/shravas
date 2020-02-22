@@ -11,6 +11,7 @@ import datetime
 import os
 import tellopy
 import rospy
+import array
 #from imutils.video import VideoStream
 from pyzbar import pyzbar
 import imutils
@@ -21,15 +22,16 @@ from sensor_msgs.msg import CompressedImage
 class qrcode():
 
 	def __init__(self):
-		
-		self.qrfl=0
-		rospy.Subscriber("camera/image_raw", Image, self.process_frame)
+		rospy.init_node('qrcode')
+		self.qrfl=1
+		rospy.Subscriber("/camera/image_raw", Image, self.process_frame)
 		self.image_pub=rospy.Publisher('/shravas/feed', Image, queue_size=10)
+		self.ros_bridge = cv_bridge.CvBridge()
 
 	def process_frame(self, msg):
 		print("Entered feed.py")
-		frame = self.ros_bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-		img = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)		
+		img = self.ros_bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+		#img = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)		
 		
 		img = imutils.resize(img, width=400)
 		if(self.qrfl==0):
@@ -48,8 +50,6 @@ class qrcode():
 		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
 if __name__ =="__main__":
-	
-	rospy.init_node('qrcode')
 	tellotrack = qrcode()    
 	#test = qrcode()
 	while not rospy.is_shutdown():

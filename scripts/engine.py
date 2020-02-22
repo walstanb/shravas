@@ -8,6 +8,8 @@ from std_msgs.msg import Int16,Int32, Float64, String
 from sensor_msgs.msg import Image, CompressedImage, Imu
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+#from tello_driver.msg import TelloStatus
+from tello_driver.cfg import TelloConfig
 from dynamic_reconfigure.server import Server
 from cv_bridge import CvBridgeError, CvBridgeError
 import cv2,cv_bridge
@@ -97,7 +99,7 @@ class engine(tello.Tello):
 			rospy.get_param('~connect_timeout_sec', 10.0))
 		self.stream_h264_video = bool(
 			rospy.get_param('~stream_h264_video', False))
-		self.bridge = CvBridgeError()
+		self.bridge = cv_bridge.CvBridge()
 		self.frame_thread = None
 
 		# Connect to drone
@@ -128,6 +130,8 @@ class engine(tello.Tello):
 		# Setup topics and services
 		# NOTE: ROS interface deliberately made to resemble bebop_autonomy
 		#self.pub_status = rospy.Publisher('status', TelloStatus, queue_size=1, latch=True)
+		#self.pub_image_raw = rospy.Publisher('camera/image_raw', Image, queue_size=10)
+		
 		if self.stream_h264_video:
 			self.pub_image_h264 = rospy.Publisher(
 				'image_raw/h264', CompressedImage, queue_size=10)
@@ -149,7 +153,7 @@ class engine(tello.Tello):
 		self.sub_fast_mode = rospy.Subscriber(
 			'fast_mode', Empty, self.cb_fast_mode)
 
-		self.subscribe(self.EVENT_FLIGHT_DATA, self.cb_status_log)
+		#self.subscribe(self.EVENT_FLIGHT_DATA, self.cb_status_log)
 
 #########################################BEGIN#####################################
 
@@ -271,7 +275,7 @@ class engine(tello.Tello):
 		self.preverr_throt=0.0
 		self.counter=0
 
-		self.ros_bridge = cv_bridge.CvBridge()               
+		#self.ros_bridge = cv_bridge.CvBridge()               
 		
 ###########################################END#####################################
 
@@ -827,7 +831,7 @@ class engine(tello.Tello):
 		self.cfg = config
 		return self.cfg
 
-	def cb_status_log(self, event, sender, data, **args):
+	'''def cb_status_log(self, event, sender, data, **args):
 		speed_horizontal_mps = math.sqrt(
 			data.north_speed*data.north_speed+data.east_speed*data.east_speed)/10.
 
@@ -875,7 +879,7 @@ class engine(tello.Tello):
 			cmd_vspeed_ratio=self.left_y,
 			cmd_fast_mode=self.fast_mode,
 		)
-		self.pub_status.publish(msg)
+		self.pub_status.publish(msg)'''
 
 	def cb_data_log(self, event, sender, data, **args):
 		time_cb = rospy.Time.now()
@@ -977,15 +981,12 @@ class engine(tello.Tello):
 				for frame in container.decode(video=0):
 
 					####### IP Here   #########
-					'''
+					
 					#img = np.array(frame.to_image())
 
 					img = cv2.cvtColor(np.array(frame.to_image()), cv2.COLOR_RGB2BGR)
 					
-					x,y = 360,270
-					img = cv2.line(img,(x,y-10),(x,y+10),(0,0,255),1)
-					img = cv2.line(img,(x-10,y),(x+10,y),(0,0,255),1)
-					img = imutils.resize(img, width=400)
+					
 					if(self.qrfl==0):
 						barcodes = pyzbar.decode(img)
 						for barcode in barcodes:
@@ -996,14 +997,19 @@ class engine(tello.Tello):
 							print("\n--------------------------------------------------------------\n")
 							self.qrfl=1
 					img = imutils.resize(img, width=720)
+					x,y = 360,270
+					img = cv2.line(img,(x,y-10),(x,y+10),(0,0,255),1)
+					img = cv2.line(img,(x-10,y),(x+10,y),(0,0,255),1)
+					img = imutils.resize(img, width=400)
+					#img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 					#cv2.imshow("Qrcode Scanner", img)
 					#key = cv2.waitKey(1) & 0xFF
-					'''
+					
 
 					try:
-						img_msg = self.bridge.cv2_to_imgmsg(img, 'rgb8')
+						img_msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
 						img_msg.header.frame_id = self.caminfo.header.frame_id
 					except CvBridgeError as err:
 						rospy.logerr('fgrab: cv bridge failed - %s' % str(err))
