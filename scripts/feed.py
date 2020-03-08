@@ -47,7 +47,7 @@ class qrcode():
 		x,y = 360,270
 		img = cv2.line(img,(x,y-10),(x,y+10),(0,0,255),1)
 		img = cv2.line(img,(x-10,y),(x+10,y),(0,0,255),1)
-		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(img, 'bgr8'))
 
 if __name__ =="__main__":
 	tellotrack = qrcode()    

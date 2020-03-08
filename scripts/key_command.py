@@ -52,6 +52,7 @@ if __name__=="__main__":
     keyboard_control={  #dictionary containing the key pressed abd value associated with it
                       'i': 105,
                       'k': 107,
+                      'q': 113,
                       'j': 106,
                       'l': 108,
                       'd':100, 

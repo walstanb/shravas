@@ -45,10 +45,11 @@
 	<node pkg="rqt_image_view" type="rqt_image_view" name="overhead_cam" args="/whycon/image_out" />
 
 	<node name="key_command" type="key_command.py" pkg="shravas"/>
-	<node name="tello_driver_node" type="engine.py" pkg="shravas" output="screen"/>
+	<!--node name="tello_driver_node" type="engine.py" pkg="shravas" output="screen"/-->
 	<node name="qrcode" type="feed.py" pkg="shravas" output="screen"/>
+	<node name="snr" type="object_tracker.py" pkg="shravas" output="screen"/>
 
-	<node pkg="rqt_image_view" type="rqt_image_view" name="drone_feed" args="/shravas/feed"/>
+	<!--node pkg="rqt_image_view" type="rqt_image_view" name="drone_feed" args="/shravas/feed"/-->
 
 	<!--node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
 		<remap from="image" to="/shravas/feed"/>

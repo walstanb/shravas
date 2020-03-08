@@ -1,14 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3a6663ff-463c-4a8d-bf3a-2f2580bec325" name="Default Changelist" comment="" />
+    <list default="true" id="3a6663ff-463c-4a8d-bf3a-2f2580bec325" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/scripts/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/key_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/key_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/crc.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/crc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/dispatcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/dispatcher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/error.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/error.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/event.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/event.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/protocol.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/protocol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/state.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/state.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/video_stream.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/_internal/video_stream.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/record_log.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/record_log.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/simple_takeoff.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/simple_takeoff.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/video_effect.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tellopy/examples/video_effect.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/keep_connection.bash" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/keep_connection.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/keyboard_and_video.bash" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/keyboard_and_video.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/tello_qt.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/tello_qt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/thread_qt.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/tello_qt/thread_qt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/test.bash" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/test.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TelloPy/tests/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/TelloPy/tests/test.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/scripts/TelloPy" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1Y7wuuxfJwbDy78CazqdLB5g8Rc" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -19,6 +47,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Downloads" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="SvnConfiguration">
@@ -39,6 +68,10 @@
       <screen x="57" y="24" width="1863" height="1056" />
     </state>
     <state x="587" y="200" key="#Inspections/57.24.1863.1056@57.24.1863.1056" timestamp="1582307331254" />
+    <state x="774" y="296" key="FileChooserDialogImpl" timestamp="1583512123668">
+      <screen x="57" y="24" width="1863" height="1056" />
+    </state>
+    <state x="774" y="296" key="FileChooserDialogImpl/57.24.1863.1056@57.24.1863.1056" timestamp="1583512123668" />
     <state x="481" y="174" key="SettingsEditor" timestamp="1582307233569">
       <screen x="57" y="24" width="1863" height="1056" />
     </state>

@@ -566,7 +566,6 @@ class engine(tello.Tello):
 			try:
 				print("Takeoff")
 				self.autopilot = True #Comment this if you want to manually control the drone (for testing purpose only)
-				
 				self.takeoff()
 			except Exception as ex:
 				print(ex)
@@ -947,6 +946,7 @@ class engine(tello.Tello):
 	def cb_h264_frame(self, event, sender, data, **args):
 		frame, seq_id, frame_secs = data
 		pkt_msg = CompressedImage()
+		self.pub_image_h264.publish(pkt_msg)
 		pkt_msg.header.seq = seq_id
 		pkt_msg.header.frame_id = self.caminfo.header.frame_id
 		pkt_msg.header.stamp = rospy.Time.from_sec(frame_secs)
@@ -956,13 +956,16 @@ class engine(tello.Tello):
 
 
 		pkt_msg.data = frame
-		self.pub_image_h264.publish(pkt_msg)
+		#self.pub_image_h264.publish(pkt_msg)
 
 		self.caminfo.header.seq = seq_id
 		self.caminfo.header.stamp = rospy.Time.from_sec(frame_secs)
 		self.pub_caminfo.publish(self.caminfo)      
 
 	def framegrabber_loop(self):
+
+		#Untested Delicate Functionlity DO NOT USE 
+
 		import av #Import here as 'hack' to prevent troublesome install of PyAV when not used
 		# Repeatedly try to connect
 		vs = self.get_video_stream()
@@ -980,7 +983,7 @@ class engine(tello.Tello):
 				# vs blocks, dies on self.stop
 				for frame in container.decode(video=0):
 
-					####### IP Here   #########
+					
 					
 					#img = np.array(frame.to_image())
 
