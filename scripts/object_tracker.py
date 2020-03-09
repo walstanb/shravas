@@ -24,14 +24,15 @@ class objtracker():
 	def __init__(self):
 		self.stat = rospy.Publisher('snr/stat', Int32, queue_size=1)
 		rospy.Subscriber("/camera/image_raw", Image, self.process_frame)
-		self.image_pub=rospy.Publisher('/snr/feed', Image, queue_size=10)
+		#rospy.Subscriber("/whycon/image_out", Image, self.process_frame)
+		self.image_pub=rospy.Publisher('/snr/image_out', Image, queue_size=10)
 		self.ros_bridge = cv_bridge.CvBridge()
 		
 	
 		# initialize our centroid tracker and frame dimensions
 		self.ct = CentroidTracker()
 		(self.H, self.W) = (None, None)
-		self.confidence=0.7
+		self.confidence=0.75
 		self.statfl=0
 
 		# load our serialized model from disk
@@ -103,8 +104,8 @@ class objtracker():
 		#key = cv2.waitKey(1) & 0xFF
 
 		# if the `q` key was pressed, break from the loop
-		if key == ord("q"):
-			sys.exit(1)
+		#if key == ord("q"):
+		#	sys.exit(1)
 		# do a bit of cleanup
 		#cv2.destroyAllWindows()
 		#vs.stop()
