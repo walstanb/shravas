@@ -1,0 +1,7 @@
+<launch>
+  <node name="pid_tune_gui" type="pid_tune_gui.py" pkg="pid_tune" output="screen"/>
+  <node name="plotJuggler" type="PlotJuggler" pkg="plotjuggler" output="screen"/>
+  <!--node name="drone_pilot" type="pilot.py" pkg="shravas" output="screen"/-->
+
+  <!--node name="feed" type="feed.py" pkg="shravas" output="screen"/-->
+</launch>
