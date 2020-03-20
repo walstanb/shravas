@@ -80,7 +80,7 @@ class engine():
 		#Holds the coordinates to be achieved by the drone
 		self.wp_x=0.0
 		self.wp_y=0.0
-		self.wp_z=20.0
+		self.wp_z=22.0
 
 		#Holds the z axis coordinate of the drone stage (beehive)
 		self.ground=0
