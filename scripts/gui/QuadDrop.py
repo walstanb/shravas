@@ -228,13 +228,13 @@ class Toplevel1:
         
 
         self.XYPositionalData = tk.Canvas(self.XYPositionalDataFrame)
-        self.XYPositionalData.place(relx=0.022, rely=0.051, relheight=0.857, relwidth=0.959, bordermode='ignore')
-        self.XYPositionalData.configure(borderwidth="2")
+        self.XYPositionalData.place(relx=0.022, rely=0.051, relheight=0.86, relwidth=0.959, bordermode='ignore')
+        #self.XYPositionalData.configure(borderwidth="2")
         self.XYPositionalData.configure(cursor="crosshair")
         self.XYPositionalData.configure(relief="ridge")
         self.XYPositionalData.configure(background="#ffffff")
         self.XYPositionalData.configure(scrollregion=(0,0,2000,2000))
-        self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
+        #self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
 
         #self.xsb.grid(row=1, column=0, sticky="ew")
         #self.ysb.grid(row=0, column=1, sticky="ns")

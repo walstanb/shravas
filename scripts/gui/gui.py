@@ -79,12 +79,19 @@ class Gui():
         #root.Status.configure(text='''DisConnected''')
         #self.top.mainloop()
 
+
+        #top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#64eb34", width=2)
+        #top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
+    
+    def create_circle():
     def drawpoint(self):
-        can_x,can_y=886,486
-        x,y=440,240
+        can_x,can_y=888,491
+        x,y=200,200
         #print(top.XYPositionalData.winfo_height())
         #print(top.XYPositionalData.winfo_width())
-        top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5,outline="#0078ff",fill="#0078ff", width=2) 
+        top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5, fill="#0078ff", outline="#0078ff", width=2)
+
+
     def get_pose(self,pose):
         top.Status.configure(text=str(pose.poses[0].position.x))
 
