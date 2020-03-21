@@ -61,8 +61,8 @@ def dmode():
 		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about-dark.png"
 		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits-dark.png"
 		gridcol= "#4a4a4a"
-		fbarcol,bbarcol="lightblue","#4a4a4a"
-		fsccol,bsccol="lightblue","#4a4a4a"
+		fbarcol,bbarcol="#0078ff","#4a4a4a"
+		fsccol,bsccol="#333333","#4a4a4a"
 		w.colorflag=1
 	elif(w.colorflag == 1):
 		col1= "#d9d9d9"#light
@@ -72,15 +72,15 @@ def dmode():
 		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about.png"
 		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits.png"
 		gridcol= "#ffffff"
-		fbarcol,bbarcol="lightblue","#d9d9d9"
-		fsccol,bsccol="lightblue","#d9d9d9"
+		fbarcol,bbarcol="#0078ff","#d9d9d9"
+		fsccol,bsccol="#d9d9d9","#d9d9d9"
 		w.colorflag=0
 			
 	root.configure(bg=col1)
 	w.style.configure('.',background=col1)
 	w.style.configure('.',foreground=col2)
 	w.style.configure('Horizontal.TProgressbar',foreground=fbarcol, background=fbarcol,troughcolor=bbarcol)
-	w.style.configure('Horizontal.TScale',foreground=fsccol, background=fbarcol,troughcolor=bsccol)
+	w.style.configure('Horizontal.TScale',foreground=fsccol, background=fsccol,troughcolor=bsccol)
 	w.style.map('.', background=[('selected', col1), ('active',col1)])
 	w.Logo.configure(background=col1 , foreground=col2)
 	w.StatusLabel.configure(background=col1 , foreground=col2) 
