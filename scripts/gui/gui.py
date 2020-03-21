@@ -42,7 +42,7 @@ class Gui():
         rospy.Subscriber('tello/imu', Imu, self.tello_imu)
         rospy.Subscriber('status_msg', String, self.prnt_msg)
 
-        rospy.Subscriber('/wp', PoseArray, self.nxt)
+        rospy.Subscriber('/wp/poses', PoseArray, self.nxt)
 
         Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
         top.Logo.configure(image = Lphoto)
@@ -100,11 +100,9 @@ class Gui():
             top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
 
     def nxt(self,pose):
-        #fcan_x=fcan_y=2000/2
-        can_x,can_y=888,491
-        #scalex=scaley=100
-        if self.point!=None:
-            top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#ff7b00", width=2)
+        '''if self.nxt!=None:
+            top.XYPositionalData.delete(self.nxt)
+            self.nxt.configure(outline="#ff7b00")'''
         x,y=self.scal(pose.poses[0].position.x),self.scal(pose.poses[0].position.y)
         self.nxt=top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#64eb34", width=2)
 
