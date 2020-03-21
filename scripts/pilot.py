@@ -28,6 +28,8 @@ import imutils
 import time
 from std_msgs.msg import String
 import csvio
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point
 
 class pilot():
 		
@@ -43,9 +45,8 @@ class pilot():
 		self.homelocation=1        
 		rospy.init_node('drone_pilot')
 		
-		self.x = rospy.Publisher('/wp/x', Float64, queue_size=1)
-		self.y = rospy.Publisher('/wp/y', Float64, queue_size=1)
-		self.z = rospy.Publisher('/wp/z', Float64, queue_size=1)
+		self.wppub = rospy.Publisher('/wp_cords', PoseArray, queue_size=60)
+		self.msgpub = PoseArray()
 		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1, latch=True)
 
@@ -55,7 +56,7 @@ class pilot():
 
 		self.counter = 0
 		self.takeoffland = -1
-		self.cruize = 20.0
+		self.cruize = 10.0
 		self.drone_x = 0.0
 		self.drone_y = 0.0
 		self.drone_z = 24.0
@@ -64,9 +65,14 @@ class pilot():
 		self.wp_x = 0.0
 		self.wp_y = 0.0
 		self.wp_z = 0.0
+
+		self.coordinatespub=[0.0,0.0,30.0]
+		pose=Pose()
+		pose.position = Point(*self.coordinatespub)
+		self.msgpub.poses.append(pose)
+
 		self.startrun = 0
 		self.startend = 2
-		
 		self.coordinates=csvio.csvread('/home/krut/catkin_ws/src/shravas/scripts/coords.csv')
 
 		for index in range(len(self.coordinates)):
@@ -108,6 +114,11 @@ class pilot():
 		self.wp_x=x1
 		self.wp_y=y1
 		self.wp_z=z1
+		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
+		pose=Pose()
+		pose.position = Point(*self.coordinatespub)
+		self.msgpub.poses=[]
+		self.msgpub.poses.append(pose)
 		self.gui_status.publish("Travelling to new location")
 		self.gui_status.publish(str(self.wp_x)+","+str(self.wp_y)+","+str(self.wp_z))
 		self.counter=0
@@ -125,9 +136,13 @@ class pilot():
 
 	def land(self,endrun,index):
 		self.moveahead=0
-		#print("Landing now")
 		self.takeoffland=0
 		self.wp_z=26.0
+		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
+		pose=Pose()
+		self.msgpub.poses=[]
+		pose.position = Point(*self.coordinatespub)
+		self.msgpub.poses.append(pose)
 		self.check_delta(0.5,1.5)
 		self.takeoff.publish(self.takeoffland)
 		if(endrun==0):
@@ -135,14 +150,13 @@ class pilot():
 			while(self.moveahead!=1):
 				if(self.qr_pub == self.coordinates[index]['qr']):
 					self.moveahead=1
+					self.takeoffland=1
+					self.takeoff.publish(self.takeoffland)
 					self.gui_status.publish("Authenticated")
 					self.gui_status.publish("Qrcode Data :"+self.qr_pub)
 
 			rospy.sleep(5)
-			#self.autopilot=True
 			self.gui_status.publish("Taking off for next destination ")
-			self.takeoffland=1
-			self.takeoff.publish(self.takeoffland)
 			self.gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,2.0)
 		else:
 			self.takeoffland == -1
@@ -164,7 +178,6 @@ class pilot():
 			rospy.sleep(0.0001)
 		print("HERE !!")
 		for index in range(len(self.coordinates)):
-			#print(self.coordinates[index]['delivery'])
 			if(self.coordinates[index]['delivery'] == 0):
 				print("hello")
 				self.takeoffland=1
@@ -215,9 +228,7 @@ class pilot():
 		self.drone_y = pose.poses[0].position.y
 		self.drone_z = pose.poses[0].position.z
 		self.takeoff.publish(self.takeoffland)
-		self.x.publish(self.wp_x)
-		self.y.publish(self.wp_y)
-		self.z.publish(self.wp_z)
+		self.wppub.publish(self.msgpub)
 
 	'''
 	Function Name: setqr
