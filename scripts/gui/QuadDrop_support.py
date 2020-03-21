@@ -43,11 +43,11 @@ def create_grid(event=None):
     w.XYPositionalData.delete('grid_line') # Will only remove the grid_line
 
     # Creates all vertical lines at intevals of 100
-    for i in range(0, wid, 100):
+    for i in range(0, wid, w.scale/2):
         w.XYPositionalData.create_line([(i, 0), (i, hei)], tag='grid_line')
 
     # Creates all horizontal lines at intevals of 100
-    for i in range(0, hei, 100):
+    for i in range(0, hei, w.scale/2):
         w.XYPositionalData.create_line([(0, i), (wid, i)], tag='grid_line')
 
 def dmode():
@@ -61,8 +61,8 @@ def dmode():
 		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about-dark.png"
 		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits-dark.png"
 		gridcol= "#4a4a4a"
-		fbarcol,bbarcol="red","#4a4a4a"
-		fsccol,bsccol="red","#4a4a4a"
+		fbarcol,bbarcol="lightblue","#4a4a4a"
+		fsccol,bsccol="lightblue","#4a4a4a"
 		w.colorflag=1
 	elif(w.colorflag == 1):
 		col1= "#d9d9d9"#light
@@ -72,8 +72,8 @@ def dmode():
 		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about.png"
 		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits.png"
 		gridcol= "#ffffff"
-		fbarcol,bbarcol="red","#d9d9d9"
-		fsccol,bsccol="red","#d9d9d9"
+		fbarcol,bbarcol="lightblue","#d9d9d9"
+		fsccol,bsccol="lightblue","#d9d9d9"
 		w.colorflag=0
 			
 	root.configure(bg=col1)

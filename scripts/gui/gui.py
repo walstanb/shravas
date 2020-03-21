@@ -10,6 +10,7 @@ import rospy
 import QuadDrop
 import imutils
 import PIL.Image, PIL.ImageTk
+import csvio
 from std_msgs.msg import Int16
 from std_msgs.msg import Int32
 from std_msgs.msg import Float64
@@ -32,12 +33,14 @@ class Gui():
         top=obj
         rospy.init_node('gui')
         self.ros_bridge = cv_bridge.CvBridge()
-        #rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
+        self.point=None
+        rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
         rospy.Subscriber('drone_feed', Image, self.show_feed)
         rospy.Subscriber('tello/status', TelloStatus, self.tello_status)
         rospy.Subscriber('tello/odom', Odometry, self.tello_odom)
         rospy.Subscriber('tello/imu', Imu, self.tello_imu)
         rospy.Subscriber('status_msg', String, self.prnt_msg)
+
 
         Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
         top.Logo.configure(image = Lphoto)
@@ -69,7 +72,7 @@ class Gui():
         top.FlightData.insert('end', 'Flight Data\n- - - - - - - - - - - - - - - - - - - - - - - -\n')
         top.FlightData.configure(state='disabled')
 
-        self.drawpoint()
+        self.draw_deliv()
 
         
 
@@ -83,13 +86,30 @@ class Gui():
         #top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#64eb34", width=2)
         #top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
     
-    def create_circle():
-    def drawpoint(self):
+    #def create_circle():
+
+    def scal(self,p):
+        return p*top.scale+(top.fcan/2)
+        
+    def draw_deliv(self):
+        ls=csvio.csvread("/home/walst/catkin_ws/src/shravas/scripts/coords.csv")
+        for i in range(len(ls)):
+            x,y=self.scal(float(ls[i]['x'])),self.scal(float(ls[i]['y']))
+            top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
+
+    def draw_point(self,pose):
+        #fcan_x=fcan_y=2000/2
         can_x,can_y=888,491
-        x,y=200,200
-        #print(top.XYPositionalData.winfo_height())
-        #print(top.XYPositionalData.winfo_width())
-        top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5, fill="#0078ff", outline="#0078ff", width=2)
+        #scalex=scaley=100
+        if self.point==None:
+            x,y=self.scal(pose.poses[0].position.x),self.scal(pose.poses[0].position.y)
+            self.point=top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5, fill="#0078ff", outline="#0078ff", width=2)
+        else:
+            top.XYPositionalData.delete(self.point)
+            x,y=self.scal(pose.poses[0].position.x),self.scal(pose.poses[0].position.y)
+            self.point=top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5, fill="#0078ff", outline="#0078ff", width=2)
+        
+
 
 
     def get_pose(self,pose):

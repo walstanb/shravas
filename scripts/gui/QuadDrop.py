@@ -233,8 +233,10 @@ class Toplevel1:
         self.XYPositionalData.configure(cursor="crosshair")
         self.XYPositionalData.configure(relief="ridge")
         self.XYPositionalData.configure(background="#ffffff")
-        self.XYPositionalData.configure(scrollregion=(0,0,2000,2000))
-        #self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
+        self.scale=100
+        self.fcan=2000
+        self.XYPositionalData.configure(scrollregion=(0,0,self.fcan,self.fcan))
+        self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
 
         #self.xsb.grid(row=1, column=0, sticky="ew")
         #self.ysb.grid(row=0, column=1, sticky="ns")
@@ -472,6 +474,7 @@ class Toplevel1:
         self.dmodeButton.configure(command=QuadDrop_support.dmode)
         
         
+
 
         scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
         ssid = "WiFi not found"
