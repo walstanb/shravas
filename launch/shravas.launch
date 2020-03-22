@@ -27,16 +27,16 @@
     <param name="name" value="$(arg name)"/>
 
     <remap to="/usb_cam/camera_info" from="/camera/camera_info" />
-    <remap to="/usb_cam/image_rect_color" from="/camera/image_rect_color"/>  
-  
+    <remap to="/usb_cam/image_rect_color" from="/camera/image_rect_color"/>
   </node>
 
-  <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+  <!--node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
     <remap from="image" to="/whycon/image_out"/>
-    <param name="autosize" value="true" />
-  </node>
+    <param name="autosize" value="true" /-->
+  <!--/node-->
 
   <!--node name="key_command" type="key_command.py" pkg="shravas"/-->
-  <node name="engine" type="engine.py" pkg="shravas" output="screen"/>
+  <node name="guimain" type="QuadDrop.py" pkg="shravas" output="screen"/>
+  <!--node name="engine" type="engine.py" pkg="shravas" output="screen"/-->
   <node name="drone_pilot" type="pilot.py" pkg="shravas" output="screen"/>
 </launch>

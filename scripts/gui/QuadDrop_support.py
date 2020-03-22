@@ -29,6 +29,7 @@ from sensor_msgs.msg import Image, Imu
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
+import engine
 
 drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)
 
@@ -213,6 +214,8 @@ def chk_conn():
 		if(ssid=="rn7p"):
 			w.Status.configure(text='''Connected''', foreground="#2cbc00")
 			w.ConnectButton.place_forget()
+			eng = engine()
+			eng.feed()
 		else:
 			w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
 			w.Status.configure(text="Disconnected",foreground="#ff0000")
@@ -223,6 +226,8 @@ def conn():
 		w.ConnectButton.place_forget()
 		w.Status.configure(text="Connected",foreground="#2cbc00")
 		w.Error.place_forget()
+		eng = engine()
+		eng.feed()
 	else:
 		w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
 		w.Status.configure(text="Disconnected",foreground="#ff0000")
@@ -298,20 +303,21 @@ class Gui():
 		top.WhyconCoords.configure(state='normal')
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
-		#self.draw_nxt()
-		
 
-		#root = tk.Tk()
-		#self.top,self.win=QuadDrop.create_Toplevel1(tk.Tk())
-		#QuadDrop.vp_start_gui()
-		#root.Status.configure(text='''DisConnected''')
-		#self.top.mainloop()
+		scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
+        ssid = "WiFi not found"
+        for line in scanoutput.split():
+          line = line.decode("utf-8")
+          if line[:5]  == "ESSID":
+            ssid = line.split('"')[1]
 
-
-		#top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#64eb34", width=2)
-		#top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
-	
-	#def create_circle():
+        if(ssid=="QuadDrop"):
+            top.ConnectButton.place_forget()
+            top.Status.configure(text='''Connected''', foreground="#2cbc00")
+            eng = engine()
+			eng.feed()
+        else:
+            top.Status.configure(text="Disconnected",foreground="#ff0000")
 
 	def scal(self,x,y):
 		return x*top.Scale.get()+(top.fcan/2),(-1*y)*top.Scale.get()+(top.fcan/2)

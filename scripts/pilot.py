@@ -73,7 +73,7 @@ class pilot():
 
 		self.startrun = 0
 		self.startend = 2
-		self.coordinates=csvio.csvread('/home/krut/catkin_ws/src/shravas/scripts/coords.csv')
+		self.coordinates=csvio.csvread('/home/walst/catkin_ws/src/shravas/scripts/coords.csv')
 
 		for index in range(len(self.coordinates)):
 			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])
@@ -81,7 +81,7 @@ class pilot():
 			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
 			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
 		
-		print(self.coordinates)
+		#print(self.coordinates)
 		#self.coordinates=[{"x":0,"y":0,"Z":0,"qr":0,"delivery":0},{"x":-8.0,"y":4.0,"Z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"Z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"Z":0,"qr":0,"delivery":-1}]
 		self.qr_pub="no code"
 		self.last_time = 0.0
