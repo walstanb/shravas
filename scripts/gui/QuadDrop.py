@@ -8,7 +8,6 @@
 import sys
 import os,subprocess
 from subprocess import check_output
-import gui
 
 try:
     import Tkinter as tk
@@ -31,7 +30,7 @@ def vp_start_gui():
     root = tk.Tk()
     QuadDrop_support.set_Tk_var()
     top = Toplevel1 (root)
-    test=gui.Gui(top)
+    test=QuadDrop_support.Gui(top)
     QuadDrop_support.init(root, top)
     root.mainloop()
 
@@ -137,8 +136,9 @@ class Toplevel1:
         self.DeliveryList.place(relx=0.023, rely=0.048, relheight=0.914
                 , relwidth=0.26)
         self.DeliveryList.configure(background="white")
-        self.DeliveryList.configure(font="TkFixedFont")
+        self.DeliveryList.configure(font="TkFixedFont 11")
         self.DeliveryList.configure(selectbackground="#c4c4c4")
+        self.DeliveryList.bind('<<ListboxSelect>>',QuadDrop_support.delidetails)
 
         self.DeliveryDetails = tk.Text(self.DeliveryDetailsPage)
         self.DeliveryDetails.place(relx=0.314, rely=0.05, relheight=0.907
@@ -147,27 +147,27 @@ class Toplevel1:
         self.DeliveryDetails.configure(blockcursor="1")
         self.DeliveryDetails.configure(cursor="arrow")
         self.DeliveryDetails.configure(exportselection="0")
-        self.DeliveryDetails.configure(font="TkTextFont")
+        self.DeliveryDetails.configure(font="TkTextFont 11")
         self.DeliveryDetails.configure(selectbackground="#c4c4c4")
         self.DeliveryDetails.configure(state='disabled')
         self.DeliveryDetails.configure(wrap="word")
 
-        self.TelloEventsFrame = ttk.Labelframe(self.DroneFlightDataPage)
-        self.TelloEventsFrame.place(relx=0.012, rely=0.024, relheight=0.298
+        self.WhyconCoordsFrame = ttk.Labelframe(self.DroneFlightDataPage)
+        self.WhyconCoordsFrame.place(relx=0.012, rely=0.024, relheight=0.298
                 , relwidth=0.974)
-        self.TelloEventsFrame.configure(relief='')
-        self.TelloEventsFrame.configure(text='''Tello Events''')
+        self.WhyconCoordsFrame.configure(relief='')
+        self.WhyconCoordsFrame.configure(text='''Whycon Coordinates''')
 
-        self.TelloEvents = tk.Text(self.TelloEventsFrame)
-        self.TelloEvents.place(relx=0.012, rely=0.164, relheight=0.754
+        self.WhyconCoords = tk.Text(self.WhyconCoordsFrame)
+        self.WhyconCoords.place(relx=0.012, rely=0.164, relheight=0.754
                 , relwidth=0.976, bordermode='ignore')
-        self.TelloEvents.configure(background="white")
-        self.TelloEvents.configure(blockcursor="1")
-        self.TelloEvents.configure(cursor="arrow")
-        self.TelloEvents.configure(font="TkTextFont")
-        self.TelloEvents.configure(selectbackground="#c4c4c4")
-        self.TelloEvents.configure(state='disabled')
-        self.TelloEvents.configure(wrap="word")
+        self.WhyconCoords.configure(background="white")
+        self.WhyconCoords.configure(blockcursor="1")
+        self.WhyconCoords.configure(cursor="arrow")
+        self.WhyconCoords.configure(font="TkTextFont")
+        self.WhyconCoords.configure(selectbackground="#c4c4c4")
+        self.WhyconCoords.configure(state='disabled')
+        self.WhyconCoords.configure(wrap="word")
 
         self.Canvas3 = tk.Canvas(self.DroneFlightDataPage)
         self.Canvas3.place(relx=0.488, rely=0.349, relheight=0.617
@@ -411,7 +411,7 @@ class Toplevel1:
         self.EmStopButton.configure(background="#ff2424")   
         self.EmStopButton.configure(cursor="hand1")
         self.EmStopButton.configure(state='disabled')
-        self.EmStopButton.configure(command=gui.emstop)
+        self.EmStopButton.configure(command=QuadDrop_support.emstop)
         self.EmStopButton.configure(text='''Emergency Stop''')
 
         self.Logo = tk.Label(top)
@@ -440,7 +440,7 @@ class Toplevel1:
         self.StartButton.configure(activebackground="#45ed61")
         self.StartButton.configure(activeforeground="#ffffff")
         self.StartButton.configure(cursor="hand1")
-        self.StartButton.configure(command=gui.start)
+        self.StartButton.configure(command=QuadDrop_support.start)
         self.StartButton.configure(text='''Start''')
 
         self.ConnectButton = tk.Button(top)
