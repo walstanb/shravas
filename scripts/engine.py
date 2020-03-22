@@ -663,11 +663,22 @@ Output:			none
 Logic:			initializes send_data and starts autocontrol if the drone is not shut down
 Example Call:	called automatically
 '''
+var=0
+def enginit(msg):
+	global var
+	if (msg==1):
+		var=1
+	else:
+		var=0
 
 if __name__ == '__main__':
-	test = engine()
-	test.feed()
-	sys.exit(1)
+	rospy.Subscriber('/eng_init', Int32, enginit)
+	while(True):
+		if (var == 1):
+			test = engine()
+			test.feed()
+			sys.exit(1)
+
 
 
 

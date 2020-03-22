@@ -48,6 +48,8 @@ def start():
 	drobj.publish(1)
 def emstop():
 	drobj.publish(0)
+def callback():
+	drobj.publish(-1)
 
 def set_Tk_var():
 	global che48

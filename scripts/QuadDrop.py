@@ -479,6 +479,7 @@ class Toplevel1:
         self.CallbackButton = tk.Button(top)
         self.CallbackButton.place(relx=0.134, rely=0.952, height=28, width=169)
         self.CallbackButton.configure(activebackground="#f9f9f9")
+        self.CallbackButton.configure(command=QuadDrop_support.callback)
         self.CallbackButton.configure(text='''Callback''')
         self.CallbackButton.configure(state='disabled')
         self.colorflag=0
