@@ -39,19 +39,19 @@ class Gui():
         rospy.Subscriber('tello/imu', Imu, self.tello_imu)
         rospy.Subscriber('status_msg', String, self.prnt_msg)
 
-        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
+        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/krut/catkin_ws/src/shravas/scripts/gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
         top.Logo.configure(image = Lphoto)
         top.Logo.image = Lphoto
 
-        Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
+        Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/krut/catkin_ws/src/shravas/scripts/gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
         top.CreditsSlide.configure(image = Cphoto)
         top.CreditsSlide.image = Cphoto
 
-        Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
+        Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/krut/catkin_ws/src/shravas/scripts/gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
         top.AboutSlide.configure(image = Aphoto)
         top.AboutSlide.image = Aphoto
 
-        Dphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/dmode.png").resize((15, 15), PIL.Image.ANTIALIAS))
+        Dphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/krut/catkin_ws/src/shravas/scripts/gui/dmode.png").resize((15, 15), PIL.Image.ANTIALIAS))
         top.dmodeButton.configure(image = Dphoto)
         top.dmodeButton.image = Dphoto
 

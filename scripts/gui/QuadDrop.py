@@ -473,7 +473,7 @@ class Toplevel1:
         
         
 
-        scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
+        scanoutput = check_output(["iwlist", "wlo1", "scan"])
         ssid = "WiFi not found"
         for line in scanoutput.split():
           line = line.decode("utf-8")
