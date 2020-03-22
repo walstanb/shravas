@@ -2,9 +2,10 @@
 from std_msgs.msg import Int32
 from std_msgs.msg import Float64
 import rospy
-
 import array as arr
 from geometry_msgs.msg import PoseArray
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point
 
 class ippilot():
 	'''
@@ -18,6 +19,16 @@ class ippilot():
 	def __init__(self):
 		rospy.init_node('snr_pilot')
 		self.homelocation = 1
+		self.wppub = rospy.Publisher('/wp_cords', PoseArray, queue_size=60)
+		self.msgpub = PoseArray()
+
+		self.coordinatespub=[0.0,0.0,30.0]
+		pose=Pose()
+		pose.position = Point(*self.coordinatespub)
+		self.msgpub.poses.append(pose)
+
+
+
 		rospy.Subscriber('whycon/poses', PoseArray,self.get_pose)
 		rospy.Subscriber('/snr/stat', Int16, self.check_stuck)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1)
@@ -38,10 +49,7 @@ class ippilot():
 		self.traverse_x = 0.4
 		self.traverse_y = 0.0
 		self.traverse_z = 0.2
-		self.top_z = 10.0 
-		self.x = rospy.Publisher('/wp/x', Float64, queue_size=1)
-		self.y = rospy.Publisher('/wp/y', Float64, queue_size=1)
-		self.z = rospy.Publisher('/wp/z', Float64, queue_size=1)
+		self.top_z = 10.0 	
 		self.drone_wait=1
 
 	def check_delta(self,err_xy,err_z):
@@ -107,9 +115,7 @@ class ippilot():
 		self.drone_z = pose.poses[0].position.z
 		self.takeoff.publish(self.takeoffland)
 		self.activate_ipflag.publish(self.activate_ip_status)
-		self.x.publish(self.wp_x)
-		self.y.publish(self.wp_y)
-		self.z.publish(self.wp_z)
+		self.wppub.publish(self.msgpub)
 
 	def check_stuck(self, data):
 		#self.person_stuck = data.data

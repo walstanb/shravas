@@ -58,9 +58,7 @@ class engine():
 		self.drone.wait_for_connection(10.0)
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
-		rospy.Subscriber('/wp/x', Float64, self.getcoordx)
-		rospy.Subscriber('/wp/y', Float64, self.getcoordy)
-		rospy.Subscriber('/wp/z', Float64, self.getcoordz)
+		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
 		rospy.Subscriber('activation', Int32, self.takeoffland)
 		rospy.Subscriber('/input_key', Int16, self.manual)
@@ -74,9 +72,9 @@ class engine():
 		self.image_pub = rospy.Publisher('drone_feed', Image, queue_size=10, latch=True)
 		self.stats = rospy.Publisher('/stats', String, queue_size=1, latch=True)
 
-		#self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
-		#self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
-		#self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
+		self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
+		self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
+		self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
 		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
 
 		
@@ -336,37 +334,18 @@ class engine():
 		self.kd_pitch = float(pid_val.Kd)/10
 
 	'''	
-	Function Name:	getcoordx
-	Input: 			x axis value from pilot
-	Output: 		value assigned to x of waypoint
-	Logic: 			copy the values from published x to x of waypoint
-	Example Call:	getcoordx(x)
+	Function Name:	getcoords
+	Input: 			x,y,z axis value from pilot
+	Output: 		value assigned to x,y,z of waypoint
+	Logic: 			copy the values from published x,y,z to x,y,z of waypoint respectively
+	Example Call:	getcoords(pose)
 	'''
 
-	def getcoordx(self,x):
-		self.wp_x=x.data
-
-	'''	
-	Function Name:	getcoordy
-	Input: 			y axis value from pilot
-	Output: 		value assigned to y of waypoint
-	Logic: 			copy the values from published y to y of waypoint
-	Example Call:	getcoordy(y)
-	'''
-
-	def getcoordy(self,y):
-		self.wp_y=y.data
-
-	'''	
-	Function Name:	getcoordz
-	Input: 			z axis value from pilot
-	Output: 		value assigned to z of waypoint
-	Logic: 			copy the values from published z to z of waypoint
-	Example Call:	getcoordz
-	'''
-
-	def getcoordz(self,z):
-		self.wp_z=z.data
+	def getcoords(self,pose):
+		self.wp_x=pose.poses[0].position.x
+		self.wp_y=pose.poses[0].position.y
+		self.wp_z=pose.poses[0].position.z
+		
 
 	'''	
 	Function Name:	takeoffland
@@ -378,7 +357,7 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
-			self.drone.takeoff()
+			#self.drone.takeoff()
 			self.gui_status.publish("Takeoff")
 			print("Takeoff")
 			self.activate_takeoff=0
@@ -412,7 +391,7 @@ class engine():
 						#self.flag=1
 						barcodeData = barcode.data.decode("utf-8")
 						self.gui_status.publish(barcodeData)
-				
+						self.qrcode.publish(barcodeData)
 
 				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
 
@@ -512,7 +491,7 @@ class engine():
 			cmd_vspeed_ratio=None,
 			cmd_fast_mode=None,
 		)
-		#self.pub_status.publish(msg)
+		self.pub_status.publish(msg)
 
 	def cb_data_log(self, event, sender, data, **args):
 		time_cb = rospy.Time.now()
@@ -538,7 +517,7 @@ class engine():
 		odom_msg.twist.twist.angular.y = data.imu.gyro_y
 		odom_msg.twist.twist.angular.z = data.imu.gyro_z
 				
-		#self.pub_odom.publish(odom_msg)
+		self.pub_odom.publish(odom_msg)
 		
 		imu_msg = Imu()
 		imu_msg.header.stamp = time_cb
@@ -555,7 +534,7 @@ class engine():
 		imu_msg.linear_acceleration.y = data.imu.acc_y
 		imu_msg.linear_acceleration.z = data.imu.acc_z
 		
-		#self.pub_imu.publish(imu_msg)
+		self.pub_imu.publish(imu_msg)
 
 	def manual(self, msg):
 		self.key_value = msg.data
