@@ -29,7 +29,6 @@ from sensor_msgs.msg import Image, Imu
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
-import engine
 
 import getpass
 global pathh
@@ -44,6 +43,7 @@ ls=csvio.csvread(pathh+"coords.csv")
 delidat=csvio.csvread(pathh+"deliverydata.csv")
 
 drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)
+eng = rospy.Publisher('/eng_init', Int32, queue_size=1)
 def start():
 	drobj.publish(1)
 def emstop():
@@ -221,8 +221,7 @@ def chk_conn():
 		if(ssid=="rn7p"):
 			w.Status.configure(text='''Connected''', foreground="#2cbc00")
 			w.ConnectButton.place_forget()
-			eng = engine()
-			eng.feed()
+			eng.publish(1)
 		else:
 			w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
 			w.Status.configure(text="Disconnected",foreground="#ff0000")
@@ -233,8 +232,7 @@ def conn():
 		w.ConnectButton.place_forget()
 		w.Status.configure(text="Connected",foreground="#2cbc00")
 		w.Error.place_forget()
-		eng = engine()
-		eng.feed()
+		eng.publish(1)
 	else:
 		w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
 		w.Status.configure(text="Disconnected",foreground="#ff0000")
@@ -321,8 +319,7 @@ class Gui():
 		if(ssid=="QuadDrop"):
 			top.ConnectButton.place_forget()
 			top.Status.configure(text='''Connected''', foreground="#2cbc00")
-			eng = engine()
-			eng.feed()
+			eng.publish(1)
 		else:
 			top.Status.configure(text="Disconnected",foreground="#ff0000")
 
