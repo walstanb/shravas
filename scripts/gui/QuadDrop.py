@@ -220,11 +220,17 @@ class Toplevel1:
         self.XYPositionalDataFrame.configure(relief='')
         self.XYPositionalDataFrame.configure(text='''XY Positional Data''')
 
-        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=1.0, style='Horizontal.TScale')
+        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=200, style='Horizontal.TScale')
         self.Scale.place(relx=0.022, rely=0.947, relwidth=0.958, relheight=0.0
                 , height=17, bordermode='ignore')
         self.Scale.configure(takefocus="")
         self.Scale.configure(cursor="sb_h_double_arrow")
+        self.sca=100
+        self.scal=100
+        #self.Scale.configure(variable=self.sca)
+        self.Scale.set(100)
+        self.Scale.configure(command=self.zoomer)
+        #self.sca=tk.IntVar()
         
 
         self.XYPositionalData = tk.Canvas(self.XYPositionalDataFrame)
@@ -233,10 +239,12 @@ class Toplevel1:
         self.XYPositionalData.configure(cursor="crosshair")
         self.XYPositionalData.configure(relief="ridge")
         self.XYPositionalData.configure(background="#ffffff")
-        self.scale=100
+        #self.scale=100
         self.fcan=2000
         self.XYPositionalData.configure(scrollregion=(0,0,self.fcan,self.fcan))
         self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
+
+
 
         #self.xsb.grid(row=1, column=0, sticky="ew")
         #self.ysb.grid(row=0, column=1, sticky="ns")
@@ -245,6 +253,10 @@ class Toplevel1:
         #self.grid_columnconfigure(0, weight=1)
         self.XYPositionalData.bind("<ButtonPress-1>", self.scroll_start)
         self.XYPositionalData.bind("<B1-Motion>", self.scroll_move)
+        self.XYPositionalData.bind("<Button-4>", self.zoomerP)
+        self.XYPositionalData.bind("<Button-5>", self.zoomerM)
+        self.XYPositionalData.xview_moveto(0.3)
+        self.XYPositionalData.yview_moveto(0.3)
 
         self.Progressbar = ttk.Progressbar(top, style="Horizontal.TProgressbar")
         self.Progressbar.place(relx=0.236, rely=0.957, relwidth=0.733
@@ -495,6 +507,25 @@ class Toplevel1:
 
     def scroll_move(self, event):
         self.XYPositionalData.scan_dragto(event.x, event.y, gain=1)
+
+    def zoomer(self, event):
+        if(int(self.Scale.get())<self.scal):
+            self.XYPositionalData.scale("all", 444, 245, 0.99, 0.99)
+        elif(int(self.Scale.get())>self.scal):
+            self.XYPositionalData.scale("all", 444, 245, 1.01, 1.01)
+        self.scal=int(self.Scale.get())
+        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
+        #self.XYPositionalData.scale("all", 444, 245, 1.1, 1.1)
+    
+    def zoomerP(self,event):
+        self.XYPositionalData.scale("all", event.x, event.y, 1.1, 1.1)
+        #print(event.x, event.y)
+        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
+
+    def zoomerM(self,event):
+        self.XYPositionalData.scale("all", event.x, event.y, 0.9, 0.9)
+        #print(event.x, event.y)
+        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
 
 if __name__ == '__main__':
     vp_start_gui()

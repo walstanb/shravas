@@ -38,16 +38,16 @@ def init(top, gui, *args, **kwargs):
 	root = top
 
 def create_grid(event=None):
-    wid = 2000 # Get current width of canvas
-    hei = 2000 # Get current height of canvas
+    wid = w.fcan # Get current width of canvas
+    hei = w.fcan # Get current height of canvas
     w.XYPositionalData.delete('grid_line') # Will only remove the grid_line
 
     # Creates all vertical lines at intevals of 100
-    for i in range(0, wid, w.scale/2):
+    for i in range(0, wid, w.sca/2):
         w.XYPositionalData.create_line([(i, 0), (i, hei)], tag='grid_line')
 
     # Creates all horizontal lines at intevals of 100
-    for i in range(0, hei, w.scale/2):
+    for i in range(0, hei, w.sca/2):
         w.XYPositionalData.create_line([(0, i), (wid, i)], tag='grid_line')
 
 def dmode():
