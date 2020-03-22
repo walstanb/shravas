@@ -28,6 +28,7 @@ import imutils
 import time
 from std_msgs.msg import String
 import csvio
+import getpass
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 
@@ -73,7 +74,7 @@ class pilot():
 
 		self.startrun = 0
 		self.startend = 2
-		self.coordinates=csvio.csvread('/home/walst/catkin_ws/src/shravas/scripts/coords.csv')
+		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
 
 		for index in range(len(self.coordinates)):
 			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])

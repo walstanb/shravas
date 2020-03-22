@@ -31,12 +31,19 @@ from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
 import engine
 
-drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)
+import getpass
+global pathh
+pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
+
+global wificard
+wc=os.listdir('/sys/class/net/')
+wificard=str(wc[0])
 
 global delidat,ls
-ls=csvio.csvread("/home/walst/catkin_ws/src/shravas/scripts/coords.csv")
-delidat=csvio.csvread("/home/walst/catkin_ws/src/shravas/src/deliverydata.csv")
+ls=csvio.csvread(pathh+"coords.csv")
+delidat=csvio.csvread(pathh+"deliverydata.csv")
 
+drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)
 def start():
 	drobj.publish(1)
 def emstop():
@@ -77,9 +84,9 @@ def dmode():
 		col1= "#333333"#dark
 		col2= "#ffffff"
 		col3= "#000000"
-		logo= "/home/walst/catkin_ws/src/shravas/scripts/gui/logodark.png"
-		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about-dark.png"
-		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits-dark.png"
+		logo= pathh+"gui/logodark.png"
+		about= pathh+"gui/about-dark.png"
+		credits= pathh+"gui/credits-dark.png"
 		gridcol= "#4a4a4a"
 		fbarcol,bbarcol="#0078ff","#4a4a4a"
 		fsccol,bsccol="#333333","#4a4a4a"
@@ -88,9 +95,9 @@ def dmode():
 		col1= "#d9d9d9"#light
 		col2= "#000000"
 		col3= "#ffffff"
-		logo= "/home/walst/catkin_ws/src/shravas/scripts/gui/logoba.jpeg"
-		about= "/home/walst/catkin_ws/src/shravas/scripts/gui/about.png"
-		credits= "/home/walst/catkin_ws/src/shravas/scripts/gui/credits.png"
+		logo= pathh+"gui/logoba.jpeg"
+		about= pathh+"gui/about.png"
+		credits= pathh+"gui/credits.png"
 		gridcol= "#ffffff"
 		fbarcol,bbarcol="#0078ff","#d9d9d9"
 		fsccol,bsccol="#d9d9d9","#d9d9d9"
@@ -190,13 +197,13 @@ def delidetails(event):
 		return
 	w.DeliveryDetails.configure(state='normal')
 	w.DeliveryDetails.delete('3.0', 'end')
-	strr="Name : "+str(delidat[n]['Name'])
-	strr+="\nAddress : "+str(delidat[n]['Address'])
-	strr+="\nItemName : "+str(delidat[n]['ItemName'])
-	strr+="\nItemWeight : "+str(delidat[n]['ItemWeight'])
-	strr+="\nDeliveryId : "+str(delidat[n]['DeliveryId'])
-	strr+="\nCustomerId : "+str(delidat[n]['CustomerId'])
-	strr+="\nCoordinate Location : "+str(delidat[n]['X'])+",\t"+str(delidat[n]['Y'])+",\t"+str(delidat[n]['Z'])
+	strr="Name\t\t:  "+str(delidat[n]['Name'])
+	strr+="\nAddress\t\t:  "+str(delidat[n]['Address'])
+	strr+="\nItemName\t\t:  "+str(delidat[n]['ItemName'])
+	strr+="\nItemWeight\t\t:  "+str(delidat[n]['ItemWeight'])
+	strr+="\nDeliveryId\t\t:  "+str(delidat[n]['DeliveryId'])
+	strr+="\nCustomerId\t\t:  "+str(delidat[n]['CustomerId'])
+	strr+="\nCoordinate Location\t\t:  "+str(delidat[n]['X'])+",\t"+str(delidat[n]['Y'])+",\t"+str(delidat[n]['Z'])
 	w.DeliveryDetails.insert('3.0',strr)
 	w.DeliveryDetails.update()
 	w.DeliveryDetails.configure(state='disabled')
@@ -204,7 +211,7 @@ def delidetails(event):
 
 
 def chk_conn():
-		scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
+		scanoutput = check_output(["iwlist", wificard, "scan"])
 		ssid = "WiFi not found"
 		for line in scanoutput.split():
 		  line = line.decode("utf-8")
@@ -238,6 +245,7 @@ def destroy_window():
 	global top_level
 	top_level.destroy()
 	top_level = None
+	sys.exit(1)
 
 class Gui():
 
@@ -257,19 +265,19 @@ class Gui():
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
 
-		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
+		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
 		top.Logo.image = Lphoto
 
-		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.CreditsSlide.configure(image = Cphoto)
 		top.CreditsSlide.image = Cphoto
 
-		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.AboutSlide.configure(image = Aphoto)
 		top.AboutSlide.image = Aphoto
 
-		Dphoto = PIL.ImageTk.PhotoImage(PIL.Image.open("/home/walst/catkin_ws/src/shravas/scripts/gui/dmode.png").resize((15, 15), PIL.Image.ANTIALIAS))
+		Dphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/dmode.png").resize((15, 15), PIL.Image.ANTIALIAS))
 		top.dmodeButton.configure(image = Dphoto)
 		top.dmodeButton.image = Dphoto
 
@@ -303,7 +311,7 @@ class Gui():
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
 
-		scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
+		scanoutput = check_output(["iwlist", wificard, "scan"])
 		ssid = "WiFi not found"
 		for line in scanoutput.split():
 		  line = line.decode("utf-8")
@@ -348,7 +356,7 @@ class Gui():
 		top.WhyconCoords.configure(state='normal')
 		top.WhyconCoords.delete('3.0', 'end')
 		top.WhyconCoords.update()
-		strr="   Position:\n   x: "+str(pose.poses[0].position.x)+"\t\ty: "+str(pose.poses[0].position.y)+"\t\tz: "+str(pose.poses[0].position.z)
+		strr="   Position:\n   x: "+str(pose.poses[0].position.x)+"\t\t\t\ty: "+str(pose.poses[0].position.y)+"\t\t\t\tz: "+str(pose.poses[0].position.z)
 		#strr+="\n   Orientation:\n   w: "+str(data.pose.pose.orientation.w)+"\tx: "+str(data.pose.pose.orientation.x)+"\n   y: "+str(data.pose.pose.orientation.y)+"\tz: "+str(data.pose.pose.orientation.z)
 		top.WhyconCoords.insert('3.0',strr)
 		top.WhyconCoords.configure(state='disabled')
