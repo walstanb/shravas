@@ -58,9 +58,7 @@ class engine():
 		self.drone.wait_for_connection(10.0)
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
-		rospy.Subscriber('/wp/x', Float64, self.getcoordx)
-		rospy.Subscriber('/wp/y', Float64, self.getcoordy)
-		rospy.Subscriber('/wp/z', Float64, self.getcoordz)
+		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
 		rospy.Subscriber('activation', Int32, self.takeoffland)
 		rospy.Subscriber('/input_key', Int16, self.manual)
@@ -160,7 +158,6 @@ class engine():
 			self.rc(throt_value,pitch_value,roll_value,yaw_value)
 
 	'''
-
 	Function Name: limit
 	Input:         value, upper, lower
 	Output:        value in limits
@@ -327,37 +324,18 @@ class engine():
 		self.kd_pitch = float(pid_val.Kd)/10
 
 	'''	
-	Function Name:	getcoordx
-	Input: 			x axis value from pilot
-	Output: 		value assigned to x of waypoint
-	Logic: 			copy the values from published x to x of waypoint
-	Example Call:	getcoordx(x)
+	Function Name:	getcoords
+	Input: 			x,y,z axis value from pilot
+	Output: 		value assigned to x,y,z of waypoint
+	Logic: 			copy the values from published x,y,z to x,y,z of waypoint respectively
+	Example Call:	getcoords(pose)
 	'''
 
-	def getcoordx(self,x):
-		self.wp_x=x.data
+	def getcoords(self,pose):
+		self.wp_x=pose.poses[0].position.x
+		self.wp_y=pose.poses[0].position.y
+		self.wp_z=pose.poses[0].position.z
 
-	'''	
-	Function Name:	getcoordy
-	Input: 			y axis value from pilot
-	Output: 		value assigned to y of waypoint
-	Logic: 			copy the values from published y to y of waypoint
-	Example Call:	getcoordy(y)
-	'''
-
-	def getcoordy(self,y):
-		self.wp_y=y.data
-
-	'''	
-	Function Name:	getcoordz
-	Input: 			z axis value from pilot
-	Output: 		value assigned to z of waypoint
-	Logic: 			copy the values from published z to z of waypoint
-	Example Call:	getcoordz
-	'''
-
-	def getcoordz(self,z):
-		self.wp_z=z.data
 
 	'''	
 	Function Name:	takeoffland
@@ -380,7 +358,7 @@ class engine():
 			print("Land")
 			self.activate_takeoff=1
 			self.flag=0
-			#self.autopilot=False
+			self.autopilot=False
 
 	def feed(self):
 		rospy.sleep(5)
@@ -408,7 +386,6 @@ class engine():
 
 
 				image = imutils.resize(image, width=720)
-
 				x,y = 360,270
 				image = cv2.line(image,(x,y-10),(x,y+10),(0,0,255),1)
 				image = cv2.line(image,(x-10,y),(x+10,y),(0,0,255),1)
@@ -590,6 +567,3 @@ if __name__ == '__main__':
 	test = engine()
 	test.feed()
 	sys.exit(1)
-
-
-
