@@ -36,7 +36,11 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-wificard=str(wc[0])
+for i in range(len(wc)):
+	if(wc[i]!='lo'):
+		wificard=str(wc[i])
+	#else:
+	#	wificard="#manualwificard"
 
 global delidat,ls
 ls=csvio.csvread(pathh+"coords.csv")
@@ -227,7 +231,13 @@ def delidetails(event):
 	w.DeliveryDetails.update()
 	w.DeliveryDetails.configure(state='disabled')
 
+def scal(self,x,y):
+	return x*w.sca+(w.fcan/2),(-1*y)*w.sca+(w.fcan/2)
 
+def draw_deliv(self):
+	for i in range(len(ls)):
+		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
+		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
 
 def chk_conn():
 		scanoutput = check_output(["iwlist", wificard, "scan"])
@@ -240,6 +250,7 @@ def chk_conn():
 		if(ssid=="rn7p"):
 			w.Status.configure(text='''Connected''', foreground="#2cbc00")
 			w.ConnectButton.place_forget()
+			draw_deliv()
 			eng.publish(1)
 		else:
 			w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
@@ -251,6 +262,7 @@ def conn():
 		w.ConnectButton.place_forget()
 		w.Status.configure(text="Connected",foreground="#2cbc00")
 		w.Error.place_forget()
+		draw_deliv()
 		eng.publish(1)
 	else:
 		w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
@@ -264,6 +276,7 @@ def destroy_window():
 	top_level = None
 	sys.exit(1)
 
+
 class Gui():
 
 	def __init__(self,obj=None):
@@ -271,7 +284,7 @@ class Gui():
 		top=obj
 		self.ros_bridge = cv_bridge.CvBridge()
 		self.point=None
-		self.draw_deliv()
+		#self.draw_deliv()
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
@@ -339,17 +352,10 @@ class Gui():
 		if(ssid=="QuadDrop"):
 			top.ConnectButton.place_forget()
 			top.Status.configure(text='''Connected''', foreground="#2cbc00")
+			draw_deliv()
 			eng.publish(1)
 		else:
 			top.Status.configure(text="Disconnected",foreground="#ff0000")
-
-	def scal(self,x,y):
-		return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
-		
-	def draw_deliv(self):
-		for i in range(len(ls)):
-			x,y=self.scal(float(ls[i]['x']),float(ls[i]['y']))
-			top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
 
 		'''if self.nxt!=None:
 		top.XYPositionalData.delete(self.nxt)
@@ -359,7 +365,7 @@ class Gui():
 		#Code for Progressbar
 		fac=100/len(ls)
 
-		self.prevx,self.prevy=x,y=self.scal(pose.poses[0].position.x, pose.poses[0].position.y)
+		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
 			self.progbarvalue=self.progbarvalue+fac
@@ -374,7 +380,7 @@ class Gui():
 		#scalex=scaley=100
 		if self.point!=None:
 			top.XYPositionalData.delete(self.point)
-		x,y=self.scal(pose.poses[0].position.x, pose.poses[0].position.y)
+		x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		self.point=top.XYPositionalData.create_oval(x-5, y-5, x+5, y+5, fill="#0078ff", outline="#0078ff", width=2)
 
 		top.WhyconCoords.configure(state='normal')
