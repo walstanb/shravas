@@ -45,7 +45,7 @@ class engine():
 	'''
 
 	def __init__(self):
-		rospy.init_node('engine')
+		
 		self.flag=1
 
 		#Variable to flag when the PID should take control of the drone
@@ -666,12 +666,13 @@ Example Call:	called automatically
 var=0
 def enginit(msg):
 	global var
-	if (msg==1):
+	if (msg.data==1):
 		var=1
 	else:
 		var=0
 
 if __name__ == '__main__':
+	rospy.init_node('engine')
 	rospy.Subscriber('/eng_init', Int32, enginit)
 	while(True):
 		if (var == 1):
