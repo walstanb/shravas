@@ -36,7 +36,8 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-wificard=str(wc[0])
+wificard = "wlo1"
+#wificard=str(wc[0])
 
 global delidat,ls
 ls=csvio.csvread(pathh+"coords.csv")

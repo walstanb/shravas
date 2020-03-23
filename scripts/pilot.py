@@ -138,13 +138,15 @@ class pilot():
 	def land(self,endrun,index):
 		self.moveahead=0
 		self.takeoffland=0
-		self.wp_z=26.0
+		self.wp_z=8.0
 		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
 		pose=Pose()
 		self.msgpub.poses=[]
 		pose.position = Point(*self.coordinatespub)
 		self.msgpub.poses.append(pose)
-		self.check_delta(0.5,1.5)
+		self.counter=0
+		while(self.counter < 100):
+			self.check_delta(0.5,1.5)	
 		self.takeoff.publish(self.takeoffland)
 		if(endrun==0):
 			self.gui_status.publish("Waiting for authentication")
