@@ -70,20 +70,34 @@ def create_grid(event=None):
 	wid = w.fcan # Get current width of canvas
 	hei = w.fcan # Get current height of canvas
 	w.XYPositionalData.delete('grid_line') # Will only remove the grid_line
-
+	#print(int(w.zmm))
 	# Creates all vertical lines at intevals of 100
-	for i in range(0, wid, w.sca/2):
+	for i in range(0, wid, w.zmm):
 		w.XYPositionalData.create_line([(i, 0), (i, hei)], tag='grid_line')
 
 	# Creates all horizontal lines at intevals of 100
-	for i in range(0, hei, w.sca/2):
+	for i in range(0, hei, w.zmm):
 		w.XYPositionalData.create_line([(0, i), (wid, i)], tag='grid_line')
 
-def dmode():
-	
+def create_nos(event=None):
+	wid = w.fcan 
+	hei = w.fcan
+	if(w.zmm==50):
+		w.XNos.delete('nos_line')
+		w.YNos.delete('nos_line')
 
+		for i in range(0, hei, w.zmm):			# Y Nos
+			w.YNos.create_line([(0, i), (wid, i)], tag='nos_line')
+			top.YNos.create_text(10,i-6,font="Consolas 8", text=str((i/50)-20))
+
+		for i in range(0, wid, w.zmm):				#X Nos
+			w.XNos.create_line([(i, 0), (i, hei)], tag='nos_line')
+			top.XNos.create_text(i-8,10,font="Consolas 8", text=str((i/50)-20))
+
+def dmode():
 	if(w.colorflag == 0):
 		col1= "#333333"#dark
+		altcol1="#d9d9d9"
 		col2= "#ffffff"
 		col3= "#000000"
 		logo= pathh+"gui/logodark.png"
@@ -95,6 +109,7 @@ def dmode():
 		w.colorflag=1
 	elif(w.colorflag == 1):
 		col1= "#d9d9d9"#light
+		altcol1="#333333"
 		col2= "#000000"
 		col3= "#ffffff"
 		logo= pathh+"gui/logoba.jpeg"
@@ -104,7 +119,7 @@ def dmode():
 		fbarcol,bbarcol="#0078ff","#d9d9d9"
 		fsccol,bsccol="#d9d9d9","#d9d9d9"
 		w.colorflag=0
-			
+	w.dmodeButton.configure(activebackground=altcol1)		
 	root.configure(bg=col1)
 	w.style.configure('.',background=col1)
 	w.style.configure('.',foreground=col2)
@@ -129,6 +144,8 @@ def dmode():
 	w.Speed.configure(background=col1 , foreground=col2)
 
 	w.XYPositionalData.configure(background=gridcol)
+	w.XNos.configure(background=gridcol)
+	w.YNos.configure(background=gridcol)
 	w.DroneLiveFeed.configure(background=col1)
 
 
@@ -155,10 +172,10 @@ def dmode():
 	w.ConnectButton.configure(activebackground=col3)
 	w.ConnectButton.configure(activeforeground=col2)
 
-	w.CallbackButton.configure(background=col1)
-	w.CallbackButton.configure(foreground=col2)
-	w.CallbackButton.configure(activebackground=col3)
-	w.CallbackButton.configure(activeforeground=col2)
+	#w.CallbackButton.configure(background=col1)
+	#w.CallbackButton.configure(foreground=col2)
+	#w.CallbackButton.configure(activebackground=col3)
+	#w.CallbackButton.configure(activeforeground=col2)
 	w.dmodeButton.configure(background=col1)
 	w.dmodeButton.configure(foreground=col2)
 	#w.ConnectButton.configure(activebackground=col3)
@@ -257,6 +274,7 @@ class Gui():
 		self.draw_deliv()
 		self.delivery_data()
 		self.nxt=None
+		self.progbarvalue=0
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
 		rospy.Subscriber('tello/status', TelloStatus, self.tello_status)
@@ -326,7 +344,7 @@ class Gui():
 			top.Status.configure(text="Disconnected",foreground="#ff0000")
 
 	def scal(self,x,y):
-		return x*top.Scale.get()+(top.fcan/2),(-1*y)*top.Scale.get()+(top.fcan/2)
+		return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
 		
 	def draw_deliv(self):
 		for i in range(len(ls)):
@@ -337,11 +355,18 @@ class Gui():
 		top.XYPositionalData.delete(self.nxt)
 		self.nxt.configure(outline="#ff7b00")'''
 	def draw_nxt(self, pose):
+
+		#Code for Progressbar
+		fac=100/len(ls)
+
 		self.prevx,self.prevy=x,y=self.scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
+			self.progbarvalue=self.progbarvalue+fac
+			w.Progressbar.configure(value=str(self.progbarvalue))
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)
 		self.nxt=top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#64eb34", width=2)
+		
 
 	def draw_point(self,pose):
 		#fcan_x=fcan_y=2000/2
