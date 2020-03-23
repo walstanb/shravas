@@ -29,6 +29,9 @@ def vp_start_gui():
     '''Starting point when module is the main routine.'''
     global val, w, root
     root = tk.Tk()
+    root.attributes('-fullscreen', True)
+    root.bind("<F11>",lambda event: root.attributes("-fullscreen",not root.attributes("-fullscreen")))
+    root.bind("<Escape>",lambda event: root.attributes("-fullscreen",False))
     QuadDrop_support.set_Tk_var()
     top = Toplevel1 (root)
     test=QuadDrop_support.Gui(top)
@@ -221,15 +224,17 @@ class Toplevel1:
         self.XYPositionalDataFrame.configure(relief='')
         self.XYPositionalDataFrame.configure(text='''XY Positional Data''')
 
-        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=200, style='Horizontal.TScale')
+        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=4, style='sc.Horizontal.TScale')
         self.Scale.place(relx=0.022, rely=0.947, relwidth=0.958, relheight=0.0
                 , height=17, bordermode='ignore')
         self.Scale.configure(takefocus="")
         self.Scale.configure(cursor="sb_h_double_arrow")
+        #self.style.configure('sc.Horizontal.TScale',tickinterval=10)
+        
         self.sca=100
-        self.scal=100
+        self.zmm=self.sca/2
         #self.Scale.configure(variable=self.sca)
-        self.Scale.set(100)
+        self.Scale.set(2)
         self.Scale.configure(command=self.zoomer)
         #self.sca=tk.IntVar()
         
@@ -245,6 +250,17 @@ class Toplevel1:
         self.XYPositionalData.configure(scrollregion=(0,0,self.fcan,self.fcan))
         self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
 
+        self.XNos = tk.Canvas(self.XYPositionalDataFrame)
+        self.XNos.place(relx=0.022, rely=0.051, relheight=0.04, relwidth=0.959, bordermode='ignore')
+        self.XNos.configure(background="#ffffff")
+        self.XNos.bind('<Configure>', QuadDrop_support.create_nos)
+        self.XNos.configure(scrollregion=(0,0,self.fcan,25))
+
+        self.YNos = tk.Canvas(self.XYPositionalDataFrame)
+        self.YNos.place(relx=0.022, rely=0.051, relheight=0.86, relwidth=0.023, bordermode='ignore')
+        self.YNos.configure(background="#ffffff")
+        self.YNos.bind('<Configure>', QuadDrop_support.create_nos)
+        self.YNos.configure(scrollregion=(0,0,25,self.fcan))
 
 
         #self.xsb.grid(row=1, column=0, sticky="ew")
@@ -252,17 +268,24 @@ class Toplevel1:
         #self.XYPositionalData.grid(row=200, column=200, sticky="nsew")
         #self.grid_rowconfigure(0, weight=1)
         #self.grid_columnconfigure(0, weight=1)
+        self.XNos.bind("<ButtonPress-1>", self.scroll_start)
+        self.XNos.bind("<B1-Motion>", self.scroll_move)
+        self.YNos.bind("<ButtonPress-1>", self.scroll_start)
+        self.YNos.bind("<B1-Motion>", self.scroll_move)
         self.XYPositionalData.bind("<ButtonPress-1>", self.scroll_start)
         self.XYPositionalData.bind("<B1-Motion>", self.scroll_move)
-        self.XYPositionalData.bind("<Button-4>", self.zoomerP)
-        self.XYPositionalData.bind("<Button-5>", self.zoomerM)
+        #self.XYPositionalData.bind("<Button-4>", self.zoomerP)
+        #self.XYPositionalData.bind("<Button-5>", self.zoomerM)
         self.XYPositionalData.xview_moveto(0.3)
-        self.XYPositionalData.yview_moveto(0.3)
+        self.XNos.xview_moveto(0.3)
+        self.XYPositionalData.yview_moveto(0.37)
+        self.YNos.yview_moveto(0.37)
 
         self.Progressbar = ttk.Progressbar(top, style="Horizontal.TProgressbar")
         self.Progressbar.place(relx=0.236, rely=0.957, relwidth=0.733
                 , relheight=0.0, height=20)
         self.Progressbar.configure(length="1365")
+        self.Progressbar.configure(value="0")
 
 
         self.Hud = ttk.Frame(top)
@@ -478,29 +501,39 @@ class Toplevel1:
 
         self.CallbackButton = tk.Button(top)
         self.CallbackButton.place(relx=0.134, rely=0.952, height=28, width=169)
-        self.CallbackButton.configure(activebackground="#f9f9f9")
+        self.CallbackButton.configure(activebackground="#ff4545")
+        self.CallbackButton.configure(activeforeground="white")
+        self.CallbackButton.configure(background="#ff2424")   
+        self.CallbackButton.configure(cursor="hand1")
         self.CallbackButton.configure(command=QuadDrop_support.callback)
-        self.CallbackButton.configure(text='''Callback''')
+        self.CallbackButton.configure(text='''Emergency Callback''')
         self.CallbackButton.configure(state='disabled')
+
         self.colorflag=0
         self.dmodeButton = tk.Button(top)
         self.dmodeButton.place(relx=0.975, rely=0.952, height=28, width=29)
         self.dmodeButton.configure(command=QuadDrop_support.dmode)
+        self.dmodeButton.configure(activebackground="#333333")
 
 
     def scroll_start(self, event):
         self.XYPositionalData.scan_mark(event.x, event.y)
+        self.XNos.scan_mark(event.x, event.y)
+        self.YNos.scan_mark(event.x, event.y)
+
 
     def scroll_move(self, event):
         self.XYPositionalData.scan_dragto(event.x, event.y, gain=1)
+        self.XNos.scan_dragto(event.x, event.y, gain=1)
+        self.YNos.scan_dragto(event.x, event.y, gain=1)
+
+    
 
     def zoomer(self, event):
-        if(int(self.Scale.get())<self.scal):
-            self.XYPositionalData.scale("all", 444, 245, 0.99, 0.99)
-        elif(int(self.Scale.get())>self.scal):
-            self.XYPositionalData.scale("all", 444, 245, 1.01, 1.01)
-        self.scal=int(self.Scale.get())
-        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
+        m=[10,25,50,100,200];
+        self.zmm=m[int(self.Scale.get())]
+        QuadDrop_support.create_grid()
+        
         #self.XYPositionalData.scale("all", 444, 245, 1.1, 1.1)
     
     def zoomerP(self,event):
