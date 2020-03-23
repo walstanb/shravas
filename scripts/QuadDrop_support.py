@@ -233,10 +233,10 @@ def delidetails(event):
 	w.DeliveryDetails.update()
 	w.DeliveryDetails.configure(state='disabled')
 
-def scal(self,x,y):
+def scal(x,y):
 	return x*w.sca+(w.fcan/2),(-1*y)*w.sca+(w.fcan/2)
 
-def draw_deliv(self):
+def draw_deliv():
 	for i in range(len(ls)):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
@@ -366,13 +366,17 @@ class Gui():
 
 		#Code for Progressbar
 		fac=100/len(ls)
-
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
 			self.progbarvalue=self.progbarvalue+fac
-			w.Progressbar.configure(value=str(self.progbarvalue))
+			print(fac ,self.progbarvalue)
+			w.Progressbar.configure(value=self.progbarvalue)
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)
+		if(self.progbarvalue==125):
+			self.progbarvalue=0
+			w.Progressbar.configure(value=0)
+			#w.Progressbar.update()
 		self.nxt=top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#64eb34", width=2)
 		
 
