@@ -40,6 +40,9 @@ class ippilot():
 		self.wp_x=0.0
 		self.wp_y=0.0
 		self.wp_z=0.0
+		self.drone_x=0.0
+		self.drone_y=0.0
+		self.drone_z=0.0
 
 		#Change all below value according to PC coordinates
 		self.cruize = 10.0
@@ -57,7 +60,7 @@ class ippilot():
 			self.counter+=1
 		else:
 			self.counter=0
-	'''
+	
 	def gotoloc(self,x1,y1,z1,deltaxy,deltaz):
 		self.wp_x=x1
 		self.wp_y=y1
@@ -70,7 +73,16 @@ class ippilot():
 		self.counter=0
 		while(self.counter < 100):
 			self.check_delta(deltaxy,deltaz)
-	'''
+
+	def WaitAtPoint(self):
+		temp_x=self.wp_x
+		temp_y=self.wp_y
+		temp_z=self.wp_z
+		gotoloc(drone_x,drone_y,drone_z,1.0,0.3)
+		rospy.sleep(5)
+		gotoloc(temp_x,temp_y,temp_z,1.0,0.3
+
+
 	def search(self):
 		self.takeoffland=1
 		rospy.sleep(2)
@@ -83,7 +95,7 @@ class ippilot():
 			# elif(self.person_stuck == 0 and self.drone_wait == 0):
 			# 	self.drone_wait = 1
 			if(self.person_stuck == 1):
-				rospy.sleep(5)
+				WaitAtPoint()
 			self.check_delta(1.0,0.3)
 		self.wp_z=20.0
 		self.counter=0
