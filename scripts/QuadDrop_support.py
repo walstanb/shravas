@@ -37,12 +37,11 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 global wificard
 wc=os.listdir('/sys/class/net/')
 wificard = "wlo1"
-#wificard=str(wc[0])
-for i in range(len(wc)):
-	if(wc[i]!='lo'):
-		wificard=str(wc[i])
-	else:
-		wificard="wlo1"
+#for i in range(len(wc)):
+#	if(wc[i]!='lo'):
+#		wificard=str(wc[i])
+#	else:
+#		wificard="wlo1"
 
 global delidat,ls
 ls=csvio.csvread(pathh+"coords.csv")
@@ -233,10 +232,10 @@ def delidetails(event):
 	w.DeliveryDetails.update()
 	w.DeliveryDetails.configure(state='disabled')
 
-def scal(self,x,y):
+def scal(x,y):
 	return x*w.sca+(w.fcan/2),(-1*y)*w.sca+(w.fcan/2)
 
-def draw_deliv(self):
+def draw_deliv():
 	for i in range(len(ls)):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
