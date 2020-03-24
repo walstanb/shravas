@@ -155,13 +155,13 @@ class engine():
 			self.calc_pid()
 
 			pitch_value = int(0 - self.correct_pitch)
-			pitch_value = self.limit(pitch_value, 69, -69)
+			pitch_value = self.limit(pitch_value, 50, -50)
 															
 			roll_value = int(0 + self.correct_roll)
 			roll_value = self.limit(roll_value, 69, -69)
 															
 			throt_value = int(0 - self.correct_throt)
-			throt_value = self.limit(throt_value, 69, -69)
+			throt_value = self.limit(throt_value, 50, -50)
 
 			yaw_value = 0									
 			self.rc(throt_value,pitch_value,roll_value,yaw_value)
@@ -357,18 +357,19 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
-			#self.drone.takeoff()
+			self.drone.takeoff()
 			self.gui_status.publish("Takeoff")
-			print("Takeoff")
+			#print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
 			self.autopilot=False
+			print(ddata.data)
 			if(ddata.data == -1):
 				print("Inside if land")
 				self.drone.land()
-			self.gui_status.publish("Land")
+				self.gui_status.publish("Land")
 			self.activate_takeoff=1
 			self.flag=0
 			
@@ -384,13 +385,13 @@ class engine():
 				
 				# find the barcodes in the frame and decode each of the barcodes
 				if(self.flag==0):
-					self.gui_status.publish("Checking for barcodes")
+					#self.gui_status.publish("Checking for barcodes")
 
 					barcodes = pyzbar.decode(image)
 					for barcode in barcodes:
 						#self.flag=1
 						barcodeData = barcode.data.decode("utf-8")
-						self.gui_status.publish(barcodeData)
+						#self.gui_status.publish(barcodeData)
 						self.qrcode.publish(barcodeData)
 
 				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN

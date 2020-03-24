@@ -369,7 +369,7 @@ class Gui():
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
 			self.progbarvalue=self.progbarvalue+fac
-			print(fac ,self.progbarvalue)
+			#print(fac ,self.progbarvalue)
 			w.Progressbar.configure(value=self.progbarvalue)
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)
 		if(self.progbarvalue==125):

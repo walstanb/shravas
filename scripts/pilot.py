@@ -57,7 +57,7 @@ class pilot():
 
 		self.counter = 0
 		self.takeoffland = -1
-		self.cruize = 10.0
+		self.cruize = 15.0
 		self.drone_x = 0.0
 		self.drone_y = 0.0
 		self.drone_z = 24.0
@@ -137,8 +137,11 @@ class pilot():
 
 	def land(self,endrun,index):
 		self.moveahead=0
-		self.takeoffland=0
-		self.wp_z=8.0
+		if(endrun == 0):
+			self.takeoffland=0
+		else:
+			self.takeoffland=-1
+		self.wp_z=18.0
 		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
 		pose=Pose()
 		self.msgpub.poses=[]
@@ -153,17 +156,14 @@ class pilot():
 			while(self.moveahead!=1):
 				if(self.qr_pub == self.coordinates[index]['qr']):
 					self.moveahead=1
-					self.takeoffland=1
-					self.takeoff.publish(self.takeoffland)
 					self.gui_status.publish("Authenticated")
 					self.gui_status.publish("Qrcode Data :"+self.qr_pub)
 
 			rospy.sleep(5)
+			self.takeoffland=1
+			self.takeoff.publish(self.takeoffland)
 			self.gui_status.publish("Taking off for next destination ")
-			self.gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,2.0)
-		else:
-			self.takeoffland == -1
-			self.takeoff.publish(self.takeoffland)	
+			self.gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,2.0)	
 
 	
 
