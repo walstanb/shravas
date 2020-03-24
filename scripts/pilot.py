@@ -82,7 +82,6 @@ class pilot():
 			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
 			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
 		
-		#print(self.coordinates)
 		#self.coordinates=[{"x":0,"y":0,"Z":0,"qr":0,"delivery":0},{"x":-8.0,"y":4.0,"Z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"Z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"Z":0,"qr":0,"delivery":-1}]
 		self.qr_pub="no code"
 		self.last_time = 0.0
@@ -176,30 +175,30 @@ class pilot():
 
 	'''
 	def fly(self):
-		#rospy.sleep(10)
+		
 		while(self.startend != 1):
 			rospy.sleep(0.0001)
-		print("HERE !!")
+		rospy.sleep(10)
 		for index in range(len(self.coordinates)):
-			if(self.coordinates[index]['delivery'] == 0):
-				print("hello")
+			self.callbackset = index
+			if(self.coordinates[self.callbackset]['delivery'] == 0):
 				self.takeoffland=1
 				self.takeoff.publish(self.takeoffland)
 				rospy.sleep(1)
 				self.gotoloc(self.home_x,self.home_y,self.cruize,1.5,3.0)
-			elif(self.coordinates[index]['delivery'] > 0):
-				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
-				self.land(0,index)
-			elif(self.coordinates[index]['delivery']== -2):
-				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
-			elif(self.coordinates[index]['delivery'] == -1):
+			elif(self.coordinates[self.callbackset]['delivery'] > 0):
+				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
+				self.land(0,self.callbackset)
+			elif(self.coordinates[self.callbackset]['delivery']== -2):
+				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
+			elif(self.coordinates[self.callbackset]['delivery'] == -1):
 				self.gui_status.publish("ALL DELIVERIES COMPLETED GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
-				self.land(1,index) 
+				self.land(1,self.callbackset) 
 			else:
 				self.gui_status.publish("BAD COORDINATES GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
-				self.land(1,index) 
+				self.land(1,self.callbackset) 
 
 
 
@@ -232,6 +231,8 @@ class pilot():
 		self.drone_z = pose.poses[0].position.z
 		self.takeoff.publish(self.takeoffland)
 		self.wppub.publish(self.msgpub)
+		if(self.startend == -1):
+			self.callbackset = 0
 
 	'''
 	Function Name: setqr
@@ -253,11 +254,36 @@ class pilot():
 	'''
 
 	def set_guicommand(self,msg): 
-		self.startend=msg.data 	# 1 for start , 0 for land 
+		self.startend=msg.data 	# 1 for start , 0 for land ,-1 for call back
 		if(self.startend == 0):
 			self.takeoffland=-1
 			self.takeoff.publish(self.takeoffland)
 			self.startend=2
+		elif(self.startend == -1):
+			self.callbackset = 0
+			if(self.takeoffland == 0):
+				self.takeoffland = 1
+				self.takeoff.publish(self.takeoffland)
+			temp={}
+			temp['x'] = self.home_x
+			temp['y'] = self.home_y
+			temp['z'] = self.cruize
+			temp['delivery'] = -2
+			temp['id'] = 0
+			self.coordinates=[]
+			self.coordinates.append(temp)
+			self.coordinatespub = [self.home_x,self.home_y,self.cruize]
+			pose=Pose()
+			self.msgpub.poses=[]
+			pose.position = Point(*self.coordinatespub)
+			self.msgpub.poses.append(pose)
+			self.counter = 0
+			while(self.counter < 100):
+				self.check_delta(0.5,1.5)
+			self.takeoffland=1
+			self.takeoff.publish(self.takeoffland)
+			self.takeoffland=-1
+			self.takeoff.publish(self.takeoffland)
 
 
 ########################   MAIN   #########################

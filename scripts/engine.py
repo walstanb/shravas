@@ -56,7 +56,8 @@ class engine():
 		self.drone = tellopy.Tello()
 		self.drone.connect()
 		self.drone.wait_for_connection(10.0)
-
+		self.container = av.open(self.drone.get_video_stream())
+		self.vid_stream = self.container.streams.video[0]
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
@@ -155,13 +156,13 @@ class engine():
 			self.calc_pid()
 
 			pitch_value = int(0 - self.correct_pitch)
-			pitch_value = self.limit(pitch_value, 50, -50)
+			pitch_value = self.limit(pitch_value, 69, -69)
 															
 			roll_value = int(0 + self.correct_roll)
 			roll_value = self.limit(roll_value, 69, -69)
 															
 			throt_value = int(0 - self.correct_throt)
-			throt_value = self.limit(throt_value, 50, -50)
+			throt_value = self.limit(throt_value, 69, -69)
 
 			yaw_value = 0									
 			self.rc(throt_value,pitch_value,roll_value,yaw_value)
@@ -357,17 +358,17 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
-			self.drone.takeoff()
+			#self.drone.takeoff()
 			self.gui_status.publish("Takeoff")
 			#print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			self.autopilot=False
-			print(ddata.data)
+			#print(ddata.data)
 			if(ddata.data == -1):
-				print("Inside if land")
+				#print("Inside if land")
+				self.autopilot=False
 				self.drone.land()
 				self.gui_status.publish("Land")
 			self.activate_takeoff=1
@@ -376,8 +377,7 @@ class engine():
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
-		self.container = av.open(self.drone.get_video_stream())
-		self.vid_stream = self.container.streams.video[0]
+		
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
 				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
