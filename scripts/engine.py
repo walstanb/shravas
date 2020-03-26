@@ -45,7 +45,7 @@ class engine():
 	'''
 
 	def __init__(self):
-		rospy.init_node('engine')
+		
 		self.flag=1
 
 		#Variable to flag when the PID should take control of the drone
@@ -56,7 +56,8 @@ class engine():
 		self.drone = tellopy.Tello()
 		self.drone.connect()
 		self.drone.wait_for_connection(10.0)
-
+		self.container = av.open(self.drone.get_video_stream())
+		self.vid_stream = self.container.streams.video[0]
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
@@ -359,24 +360,24 @@ class engine():
 		if(ddata.data==1 and self.activate_takeoff==1):
 			#self.drone.takeoff()
 			self.gui_status.publish("Takeoff")
-			print("Takeoff")
+			#print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			self.autopilot=False
+			#print(ddata.data)
 			if(ddata.data == -1):
-				print("Inside if land")
+				#print("Inside if land")
+				self.autopilot=False
 				self.drone.land()
-			self.gui_status.publish("Land")
+				self.gui_status.publish("Land")
 			self.activate_takeoff=1
 			self.flag=0
 			
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
-		self.container = av.open(self.drone.get_video_stream())
-		self.vid_stream = self.container.streams.video[0]
+		
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
 				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
@@ -384,13 +385,13 @@ class engine():
 				
 				# find the barcodes in the frame and decode each of the barcodes
 				if(self.flag==0):
-					self.gui_status.publish("Checking for barcodes")
+					#self.gui_status.publish("Checking for barcodes")
 
 					barcodes = pyzbar.decode(image)
 					for barcode in barcodes:
 						#self.flag=1
 						barcodeData = barcode.data.decode("utf-8")
-						self.gui_status.publish(barcodeData)
+						#self.gui_status.publish(barcodeData)
 						self.qrcode.publish(barcodeData)
 
 				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
@@ -663,11 +664,23 @@ Output:			none
 Logic:			initializes send_data and starts autocontrol if the drone is not shut down
 Example Call:	called automatically
 '''
+var=0
+def enginit(msg):
+	global var
+	if (msg.data==1):
+		var=1
+	else:
+		var=0
 
 if __name__ == '__main__':
-	test = engine()
-	test.feed()
-	sys.exit(1)
+	rospy.init_node('engine')
+	rospy.Subscriber('/eng_init', Int32, enginit)
+	while(True):
+		if (var == 1):
+			test = engine()
+			test.feed()
+			sys.exit(1)
+
 
 
 

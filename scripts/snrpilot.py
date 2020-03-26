@@ -2,10 +2,9 @@
 from std_msgs.msg import Int32
 from std_msgs.msg import Float64
 import rospy
+
 import array as arr
 from geometry_msgs.msg import PoseArray
-from geometry_msgs.msg import Pose
-from geometry_msgs.msg import Point
 
 class ippilot():
 	'''
@@ -19,18 +18,8 @@ class ippilot():
 	def __init__(self):
 		rospy.init_node('snr_pilot')
 		self.homelocation = 1
-		self.wppub = rospy.Publisher('/wp_cords', PoseArray, queue_size=60)
-		self.msgpub = PoseArray()
-
-		self.coordinatespub=[0.0,0.0,30.0]
-		pose=Pose()
-		pose.position = Point(*self.coordinatespub)
-		self.msgpub.poses.append(pose)
-
-
-
 		rospy.Subscriber('whycon/poses', PoseArray,self.get_pose)
-		rospy.Subscriber('/snr/stat', Int16, self.check_stuck)
+		rospy.Subscriber('/snr_stat', Float64, self.check_stuck)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1)
 		self.activate_ipflag = rospy.Publisher('ip_activation', Int32, queue_size=1)
 		self.activate_ip_status = 0
@@ -49,8 +38,10 @@ class ippilot():
 		self.traverse_x = 0.4
 		self.traverse_y = 0.0
 		self.traverse_z = 0.2
-		self.top_z = 10.0 	
-		self.drone_wait=1
+		self.top_z = 10.0 
+		self.x = rospy.Publisher('/wp/x', Float64, queue_size=1)
+		self.y = rospy.Publisher('/wp/y', Float64, queue_size=1)
+		self.z = rospy.Publisher('/wp/z', Float64, queue_size=1)
 
 	def check_delta(self,err_xy,err_z):
 		if((self.drone_x<(self.wp_x+err_xy)) & (self.drone_x>(self.wp_x-err_xy)) & (self.drone_y<(self.wp_y+err_xy)) & (self.drone_y>(self.wp_y-err_xy)) & (self.drone_z>(self.wp_z-err_z)) & (self.drone_z<(self.wp_z+err_z))):
@@ -66,6 +57,7 @@ class ippilot():
 		print(self.wp_x)
 		print(self.wp_y)
 		print(self.wp_z)
+
 		self.counter=0
 		while(self.counter < 100):
 			self.check_delta(deltaxy,deltaz)
@@ -76,13 +68,6 @@ class ippilot():
 		self.wp_z=14.0
 		self.counter=0
 		while(self.counter < 100):
-			# if(self.person_stuck == 1 and self.drone_wait == 1):
-			# 	self.drone_wait = 0
-			# 	rospy.sleep(5)
-			# elif(self.person_stuck == 0 and self.drone_wait == 0):
-			# 	self.drone_wait = 1
-			if(self.person_stuck == 1):
-				rospy.sleep(5)
 			self.check_delta(1.0,0.3)
 		self.wp_z=20.0
 		self.counter=0
@@ -114,23 +99,12 @@ class ippilot():
 		self.drone_z = pose.poses[0].position.z
 		self.takeoff.publish(self.takeoffland)
 		self.activate_ipflag.publish(self.activate_ip_status)
-		self.wppub.publish(self.msgpub)
+		self.x.publish(self.wp_x)
+		self.y.publish(self.wp_y)
+		self.z.publish(self.wp_z)
 
 	def check_stuck(self, data):
-		#self.person_stuck = data.data
-		stuck = data.data
-		if(stuck == 0 and self.drone_wait == 1):
-			self.person_stuck = 0
-		elif(stuck == 0 and self.drone_wait == 0):
-			self.person_stuck = 0
-			self.drone_wait = 1
-		elif(stuck == 1 and self.drone_wait = 1):
-			self.person_stuck = 1
-			self.drone_wait = 0
-		elif(stuck = 1 and self.drone_wait = 0):
-			self.person_stuck = 0		
-			
-
+		self.person_stuck = data.data
 
 if __name__ == '__main__' :
 	test = ippilot()
