@@ -1,4 +1,4 @@
 Name,Address,ItemName,ItemWeight,DeliveryId,CustomerId,X,Y,Z
-Aditya,"Sama,Vadodara",AI book,300,6969,420,1,1,1
-Bhattacharya,"GIDC,Vadodara",Python book,200,9696,240,1,1,1
-Narayan,"Makarpura,Vadodara",C book,100,6699,24,1,1,1
+Aditya,"Sama,Vadodara",AI book,300,6969,420,-1.3,4.3,2.0
+Bhattacharya,"GIDC,Vadodara",Python book,200,9696,240,1.0,3.1,2.6
+Narayan,"Makarpura,Vadodara",C book,100,6699,24,2.1,9.0,3.1
