@@ -31,7 +31,7 @@ from geometry_msgs.msg import PoseArray
 import av
 import imutils
 from pyzbar import pyzbar
-
+import threading
 
 
 class engine():
@@ -377,33 +377,36 @@ class engine():
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
+		#frame = "/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/gui/logodark.png"
 		
+		
+		flag = 0
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
-				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
-				image = imutils.resize(image, width=400)
-				
-				# find the barcodes in the frame and decode each of the barcodes
-				if(self.flag==0):
-					#self.gui_status.publish("Checking for barcodes")
+				if(flag==0):
+					t0 = threading.Thread(target=self.feed_exec, args=[frame])
+					t0.start()
+					flag=1
+				elif(flag==1):
+					t1 = threading.Thread(target=self.feed_exec, args=[frame])
+					t1.start()
+					flag=2
+				else:
+					t1.join()
+					t0.join()
+					flag=0
+			
+	def feed_exec(self,frame):
+		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+		image = imutils.resize(image, width=400)
 
-					barcodes = pyzbar.decode(image)
-					for barcode in barcodes:
-						#self.flag=1
-						barcodeData = barcode.data.decode("utf-8")
-						#self.gui_status.publish(barcodeData)
-						self.qrcode.publish(barcodeData)
-
-				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
-
-
-				image = imutils.resize(image, width=720)
-
-				x,y = 360,270
-				image = cv2.line(image,(x,y-10),(x,y+10),(0,0,255),1)
-				image = cv2.line(image,(x-10,y),(x+10,y),(0,0,255),1)
-
-				self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
+		if(self.flag==0):
+			barcodes = pyzbar.decode(image)
+			for barcode in barcodes:
+				self.flag=1
+				barcodeData = barcode.data.decode("utf-8")
+				self.qrcode.publish(barcodeData)
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
 
 
