@@ -59,7 +59,7 @@ def logg(*args):
         QuadDrop_support.dmode()
     elif(secu.auth(uname,passw)== -1):
         #top.Frame1.configure(background='#ff9191')
-        top.Label1.place(relx=0.06, rely=0.720, height=18, width=210)
+        top.Label1.place(relx=0.07, rely=0.728, height=18, width=210)
     #root.mainloop()
 
 def destroy_Toplevel1():
@@ -115,7 +115,6 @@ class LoginSc:
         self.Username.configure(foreground=_fgcolor)
         self.Username.config(insertbackground="#ffffff")
         self.Username.configure(relief="flat")
-        #self.Username.configure(state="active")
 
         self.Passw = tk.Entry(self.Frame1)
         self.Passw.place(relx=0.367, rely=0.459,height=23, relwidth=0.421)
@@ -157,7 +156,7 @@ class LoginSc:
         top.bind('<Return>', logg)
 
         self.Label1 = tk.Label(self.Frame1)
-        self.Label1.place(relx=0.06, rely=0.720, height=18, width=210)
+        self.Label1.place(relx=0.07, rely=0.728, height=18, width=210)
         self.Label1.configure(foreground="#ff3030")
         self.Label1.configure(text='''Incorrect Username or Password !''')
         self.Label1.configure(background=_bgcolor)
