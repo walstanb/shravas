@@ -358,7 +358,7 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
-			#self.drone.takeoff()
+			self.drone.takeoff()
 			self.gui_status.publish("Takeoff")
 			#print("Takeoff")
 			self.activate_takeoff=0

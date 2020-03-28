@@ -78,7 +78,8 @@ class pilot():
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
 		self.coordinates1=nofly.main(self.coordinates)
 		csvio.csvwrite(self.coordinates1,'/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
-
+		print(self.coordinates)
+		print(self.coordinates1)
 		for index in range(len(self.coordinates)):
 			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])
 			self.coordinates[index]['y'] = float(self.coordinates[index]['y'])

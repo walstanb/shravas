@@ -44,7 +44,7 @@ wificard = "wlo1"
 #		wificard="wlo1"
 
 global delidat,ls
-ls=csvio.csvread(pathh+"coords.csv")
+ls=csvio.csvread(pathh+"coordinates.csv")
 delidat=csvio.csvread(pathh+"deliverydata.csv")
 
 drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)

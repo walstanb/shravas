@@ -158,14 +158,14 @@ def main(wp):
 		#print("Dest :",d.x,d.y)
 		#print("WayP :",co.x,co.y)
 		if(co.x==s.x and co.y==s.y):
-			print("plannning not possible")
+			#print("plannning not possible")
 			sys.exit(1)
 		elif (co.x==d.x and co.y==d.y):
 			rwp.append({'y':d.y,'x':d.x,'delivery':1,'z':wp[i]['z'],'qr':wp[i]['qr']})
-			print()
+			#print()
 			continue
 		elif((co.x!=s.x and co.y!=s.y) or (co.x!=d.x and co.y!=d.y)):
-			print("inserting")
+			#print("inserting")
 			rwp.append({'y':co.y,'x':co.x,'delivery':0,'z':wp[i]['z'],'qr':''})
 			rwp.append({'y':d.y,'x':d.x,'delivery':1,'z':wp[i]['z'],'qr':wp[i]['qr']})
 			

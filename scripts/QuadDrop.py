@@ -43,7 +43,7 @@ def logg(*args):
     global top
     uname=top.Username.get()
     passw=top.Passw.get()
-    print(uname,passw)
+    #print(uname,passw)
     if(secu.auth(uname,passw)==1):
         top.Frame1.place_forget()
         top = None
