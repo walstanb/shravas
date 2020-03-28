@@ -6,7 +6,7 @@ import array as arr
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
-
+import time
 class ippilot():
 	'''
 	Function Name:__init__
@@ -54,7 +54,8 @@ class ippilot():
 		self.traverse_z = 0.2
 		self.top_z = 10.0 	
 		self.drone_wait=1
-
+		self.win_distance=1.0
+		self.ground_floor=22.0
 	def check_delta(self,err_xy,err_z):
 		if((self.drone_x<(self.wp_x+err_xy)) & (self.drone_x>(self.wp_x-err_xy)) & (self.drone_y<(self.wp_y+err_xy)) & (self.drone_y>(self.wp_y-err_xy)) & (self.drone_z>(self.wp_z-err_z)) & (self.drone_z<(self.wp_z+err_z))):
 			self.counter+=1
@@ -69,9 +70,15 @@ class ippilot():
 		print(self.wp_x)
 		print(self.wp_y)
 		print(self.wp_z)
-
+		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
+		pose=Pose()
+		pose.position = Point(*self.coordinatespub)
+		self.msgpub.poses=[]
+		self.msgpub.poses.append(pose)
 		self.counter=0
 		while(self.counter < 100):
+			if(self.person_stuck == 1):
+				WaitAtPoint()
 			self.check_delta(deltaxy,deltaz)
 
 	def WaitAtPoint(self):
@@ -79,33 +86,20 @@ class ippilot():
 		temp_y=self.wp_y
 		temp_z=self.wp_z
 		gotoloc(drone_x,drone_y,drone_z,1.0,0.3)
-		rospy.sleep(5)
+		time.sleep(5)
 		gotoloc(temp_x,temp_y,temp_z,1.0,0.3
 
 
 	def search(self):
 		self.takeoffland=1
 		rospy.sleep(2)
-		self.wp_z=14.0
-		self.counter=0
-		while(self.counter < 100):
-			# if(self.person_stuck == 1 and self.drone_wait == 1):
-			# 	self.drone_wait = 0
-			# 	rospy.sleep(5)
-			# elif(self.person_stuck == 0 and self.drone_wait == 0):
-			# 	self.drone_wait = 1
-			if(self.person_stuck == 1):
-				WaitAtPoint()
-			self.check_delta(1.0,0.3)
-		self.wp_z=20.0
-		self.counter=0
-		while(self.counter < 100):
-			self.check_delta(1.0,0.3)
-		self.wp_z=14.0
-		self.counter=0
-		while(self.counter < 100):
-			self.check_delta(1.0,0.3)
-		self.takeoffland=-1
+		self.wp_z=self.ground_floor
+		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
+		self.wp_x=self.wp_x + self.win_distance
+		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
+		self.wp_z=self.ground_floor
+		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
+		self.takeoffland=0
 
 	## SUBSCRIBER FUNCTIONS ##
 
