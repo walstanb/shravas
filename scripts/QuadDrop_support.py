@@ -36,7 +36,7 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-wificard = "wlo1"
+wificard = "wlp2s0"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
@@ -105,7 +105,7 @@ def dmode():
 		altcol1="#d9d9d9"
 		col2= "#ffffff"
 		col3= "#000000"
-		logo= pathh+"gui/logodark.png"
+		logo= pathh+"gui/logoo.png"
 		about= pathh+"gui/about-dark.png"
 		credits= pathh+"gui/credits-dark.png"
 		gridcol= "#4a4a4a"
@@ -117,9 +117,9 @@ def dmode():
 		altcol1="#333333"
 		col2= "#000000"
 		col3= "#ffffff"
-		logo= pathh+"gui/logoba.jpeg"
-		about= pathh+"gui/about.png"
-		credits= pathh+"gui/credits.png"
+		logo= pathh+"gui/logoo.png"
+		about= pathh+"gui/about-light.png"
+		credits= pathh+"gui/credits-light.png"
 		gridcol= "#ffffff"
 		fbarcol,bbarcol="#0078ff","#d9d9d9"
 		fsccol,bsccol="#d9d9d9","#d9d9d9"
@@ -297,15 +297,15 @@ class Gui():
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
 
-		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
+		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
 		top.Logo.image = Lphoto
 
-		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/credits-light.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.CreditsSlide.configure(image = Cphoto)
 		top.CreditsSlide.image = Cphoto
 
-		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/about-light.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.AboutSlide.configure(image = Aphoto)
 		top.AboutSlide.image = Aphoto
 

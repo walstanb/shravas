@@ -10,6 +10,11 @@ import rospy
 import secu
 import os,subprocess
 from subprocess import check_output
+import PIL.Image, PIL.ImageTk
+
+import getpass
+global pathh
+pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 try:
     import Tkinter as tk
@@ -98,12 +103,14 @@ class LoginSc:
         self.Username.configure(background="white")
         self.Username.configure(font="TkFixedFont")
         self.Username.configure(selectbackground="#c4c4c4")
+        #self.Username.configure(state="active")
 
         self.Passw = tk.Entry(self.Frame1)
         self.Passw.place(relx=0.367, rely=0.529,height=23, relwidth=0.421)
         self.Passw.configure(background="white")
         self.Passw.configure(font="TkFixedFont")
         self.Passw.configure(selectbackground="#c4c4c4")
+        self.Passw.configure(show="•")
 
         self.Label2_8 = tk.Label(self.Frame1)
         self.Label2_8.place(relx=0.172, rely=0.394, height=18, width=76)
@@ -118,10 +125,13 @@ class LoginSc:
         self.Label2_4.configure(text='''Password''')
 
         self.Head = tk.Label(self.Frame1)
-        self.Head.place(relx=0.022, rely=0.039, height=78, width=447)
+        self.Head.place(relx=0.072, rely=0.039, height=78, width=420)
         self.Head.configure(activebackground="#f9f9f9")
         self.Head.configure(font=font10)
         self.Head.configure(text='''QuadDrop Login''')
+        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
+        self.Head.configure(image = Lphoto)
+        self.Head.image = Lphoto
 
         top.bind('<Return>', logg)
 
@@ -130,6 +140,8 @@ class LoginSc:
         self.Label1.configure(foreground="#ff3030")
         self.Label1.configure(text='''Incorrect Username or Password !''')
         self.Label1.place_forget()
+
+        self.Username.focus_force()
 
 
 
