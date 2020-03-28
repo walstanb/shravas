@@ -279,7 +279,6 @@ def destroy_window():
 
 
 class Gui():
-
 	def __init__(self,obj=None):
 		global top
 		top=obj
@@ -296,6 +295,7 @@ class Gui():
 		rospy.Subscriber('tello/imu', Imu, self.tello_imu)
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
+		rospy.Subscriber('/wp_cords', PoseArray, self.upd_prog_bar)
 
 		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
@@ -361,21 +361,26 @@ class Gui():
 		'''if self.nxt!=None:
 		top.XYPositionalData.delete(self.nxt)
 		self.nxt.configure(outline="#ff7b00")'''
-	def draw_nxt(self, pose):
+	
+	def upd_prog_bar(self,data):
+		if(self.progbarvalue>=991):
+			self.progbarvalue=0
+			top.Progressbar.configure(value=self.progbarvalue)
+		#fac=1000/len(csvio.csvread(pathh+"coords.csv"))
+		fac=1000/9
+		self.progbarvalue=self.progbarvalue+fac
+		prev=100*(self.progbarvalue-fac)
+		nextt=100*(self.progbarvalue)
+		for i in range(prev,nextt):
+			time.sleep(0.00001)
+			#print((i+1)/1000.0)
+			top.Progressbar.configure(value=((i+1)/1000.0))
 
-		#Code for Progressbar
-		fac=100/len(ls)
+	def draw_nxt(self, pose):
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
-			self.progbarvalue=self.progbarvalue+fac
-			#print(fac ,self.progbarvalue)
-			w.Progressbar.configure(value=self.progbarvalue)
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)
-		if(self.progbarvalue==125):
-			self.progbarvalue=0
-			w.Progressbar.configure(value=0)
-			#w.Progressbar.update()
 		self.nxt=top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#64eb34", width=2)
 		
 
@@ -396,9 +401,6 @@ class Gui():
 		top.WhyconCoords.insert('3.0',strr)
 		top.WhyconCoords.configure(state='disabled')
 
-
-		
-
 	def delivery_data(self):
 		top.DeliveryList.insert('end',"Customer Id")
 		top.DeliveryList.insert('end',"- - - - - - - - - - - - - - - - - - - - - - - -")
@@ -407,6 +409,9 @@ class Gui():
 		#self.DeliveryDetails.configure()
 
 	def prnt_msg(self,msg):
+		if(msg.data=="Tello Connected"):
+			self.progbarvalue=0
+			top.Progressbar.configure(value=self.progbarvalue)
 		top.StatusMesaages.configure(state='normal')
 		top.StatusMesaages.configure(foreground="white")
 		top.StatusMesaages.insert('end', "\n"+msg.data)
@@ -417,10 +422,8 @@ class Gui():
 		frame = self.ros_bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		frame = imutils.resize(frame, width=656,height=405)
-		
 		photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
 		#top.Status.configure(text="Hello")
-		
 		top.DroneLiveFeed.configure(image = photo)
 		top.DroneLiveFeed.image = photo
 	

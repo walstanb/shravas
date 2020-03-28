@@ -56,9 +56,14 @@ class engine():
 		self.drone = tellopy.Tello()
 		self.drone.connect()
 		self.drone.wait_for_connection(10.0)
+
+		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
+		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		self.gui_status.publish("Tello Connected")
+		
 		self.container = av.open(self.drone.get_video_stream())
 		self.vid_stream = self.container.streams.video[0]
-		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
+
 		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
 		rospy.Subscriber('activation', Int32, self.takeoffland)
@@ -76,7 +81,7 @@ class engine():
 		self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
 		self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
 		self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
-		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		
 
 		
 		#Holds the current coordinates of the drone (recieved from whycon/poses)
