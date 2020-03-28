@@ -36,7 +36,7 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-wificard = "wlp2s0"
+wificard = "wlo1"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
