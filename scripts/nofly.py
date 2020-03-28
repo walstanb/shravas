@@ -69,12 +69,15 @@ def getWayP(s, d, cir):
 	#s.x,s.y=s.x*10.0,s.y*10.0
 	#d.x,d.y=d.x*10.0,d.y*10.0
 	#cir.x,cir.y=cir.x*10.0,cir.y*10.0
-	cir.r=cir.r*1
+	cir.r=cir.r*1.3
 
 	if(intersectsCir(s,d,cir)==False):
-		d.x,d.y=d.x/10.0,d.y/10.0
 		return d
 	else:
+
+		if(dist(s,pt(cir.x,cir.y))<=cir.r or dist(s,pt(cir.x,cir.y))<=cir.r):
+			return s
+
 		#Math Bitch 
 		import numpy as np
 		from math import acos, atan2, sin, cos
@@ -90,6 +93,8 @@ def getWayP(s, d, cir):
 		s2x = cir.x + cir.r* cos(g2)
 		s2y = cir.y + cir.r* sin(g2)
 
+		#print(s1x,s1y,s2x,s2y)
+
 		b = sqrt((d.x - cir.x)**2 + (d.y - cir.y)**2)  	# hypot() also works here
 		th = acos(cir.r / b)  								# angle theta
 		g = atan2(d.y - cir.y, d.x - cir.x)  			# direction angle of point P from C
@@ -101,6 +106,8 @@ def getWayP(s, d, cir):
 		d2x = cir.x + cir.r* cos(g2)
 		d2y = cir.y + cir.r* sin(g2)
 
+		#print(d1x,d1y,d2x,d2y)
+
 		ms1=(s.y-s1y)/float(s.x-s1x)
 		ms2=(s.y-s2y)/float(s.x-s2x)
 		md1=(d.y-d1y)/float(d.x-d1x)
@@ -111,32 +118,45 @@ def getWayP(s, d, cir):
 		cd1=d.y-md1*d.x 								#y-md1*x=d.y-md1*d.x
 		cd2=d.y-md2*d.x 								#y-md2*x=d.y-md2*d.x
 
-		j=np.array([[1.0,ms1],[1.0,md1]])
+		#print(ms1,cs1)
+		#print(ms2,cs2)
+		#print(md1,cd1)
+		#print(md2,cd2)
+
+
+		j=np.array([[1.0,-ms1],[1.0,-md1]])
 		k=np.array([cs1,cd1])
 		l=np.linalg.solve(j,k)
-		tm0=pt(l[0],l[1])
+		tm0=pt(l[1],l[0])
 
-		j=np.array([[1.0,ms1],[1.0,md2]])
+		j=np.array([[1.0,-ms1],[1.0,-md2]])
 		k=np.array([cs1,cd2])
 		l=np.linalg.solve(j,k)
-		tm1=pt(l[0],l[1])
+		tm1=pt(l[1],l[0])
 
-		j=np.array([[1.0,ms2],[1.0,md1]])
+		j=np.array([[1.0,-ms2],[1.0,-md1]])
 		k=np.array([cs2,cd1])
 		l=np.linalg.solve(j,k)
-		tm2=pt(l[0],l[1])
+		tm2=pt(l[1],l[0])
 
-		j=np.array([[1.0,ms1],[1.0,md2]])
-		k=np.array([cs1,cd2])
+		j=np.array([[1.0,-ms2],[1.0,-md2]])
+		k=np.array([cs2,cd2])
 		l=np.linalg.solve(j,k)
-		tm3=pt(l[0],l[1])
+		tm3=pt(l[1],l[0])
 
 		ll=[tm0,tm1,tm2,tm3]
+
+		#for i in range(len(ll)):
+		#	print(ll[i].x,ll[i].y)
 
 		ar=[(dist(s,ll[0])+dist(ll[0],d)),(dist(s,ll[1])+dist(ll[1],d)),(dist(s,ll[2])+dist(ll[2],d)),(dist(s,ll[3])+dist(ll[3],d))]
 		indx=np.argmin(ar)
 
-		return ll[indx]
+		if(-100.0<ll[indx].x<100.0 or -100.0<ll[indx].y<100.0):
+			return ll[indx]
+		else:
+			return s
+
 
 def main(wp):
 	'''
@@ -145,10 +165,11 @@ def main(wp):
 	Output:       	Writes coordinate data to outpur csv file
 	Logic:        	Code to structure output csv file 
 	'''
-	#wp=csvread("/home/walst/catkin_ws/src/shravas/src/coordinates.csv")
 	rwp=[]
-	#print(type(wp))
-	cir=nofl(-6.7,1.5,2.0)
+	
+	#NO FLY ZONE
+	cir=nofl(-6.7,1.5,0.0)
+
 	rwp.append({'y':wp[0]['y'],'x':wp[0]['x'],'delivery':1,'z':wp[0]['z'],'qr':wp[0]['qr']})
 	for i in range(len(wp)-1):
 		s=pt(float(wp[i]['x']),float(wp[i]['y']))
@@ -158,12 +179,10 @@ def main(wp):
 		#print("Dest :",d.x,d.y)
 		#print("WayP :",co.x,co.y)
 		if(co.x==s.x and co.y==s.y):
-			#print("plannning not possible")
+			print("path plannning not possible")
 			sys.exit(1)
 		elif (co.x==d.x and co.y==d.y):
 			rwp.append({'y':d.y,'x':d.x,'delivery':1,'z':wp[i]['z'],'qr':wp[i]['qr']})
-			#print()
-			continue
 		elif((co.x!=s.x and co.y!=s.y) or (co.x!=d.x and co.y!=d.y)):
 			#print("inserting")
 			rwp.append({'y':co.y,'x':co.x,'delivery':0,'z':wp[i]['z'],'qr':''})
@@ -178,4 +197,8 @@ if __name__ == '__main__':
 	Function Name:	__main__
 	Logic:        	For testing purposes only 
 	'''
-	main()
+	wp=[{"x":-8.52,"y":0.14,"z":0,"qr":0,"delivery":0},{"x":-4.4,"y":2.94,"z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"z":0,"qr":0,"delivery":-1}]
+	#cir=nofl(-6.7,1.5,2.0)
+	
+	rs=main(wp)
+	print(rs[1]['x'],rs[1]['y'])

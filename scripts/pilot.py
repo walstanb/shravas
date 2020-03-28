@@ -76,8 +76,8 @@ class pilot():
 		self.startrun = 0
 		self.startend = 2
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
-		self.coordinates1=nofly.main(self.coordinates)
-		csvio.csvwrite(self.coordinates1,'/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
+		self.coordinates=nofly.main(self.coordinates)
+		#csvio.csvwrite(self.coordinates1,'/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
 		print(self.coordinates)
 		print(self.coordinates1)
 		for index in range(len(self.coordinates)):
