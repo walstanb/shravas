@@ -32,7 +32,7 @@ class objtracker():
 		# initialize our centroid tracker and frame dimensions
 		self.ct = CentroidTracker()
 		(self.H, self.W) = (None, None)
-		self.confidence=0.75
+		self.confidence=0.78
 		self.statfl=0
 
 		# load our serialized model from disk
@@ -80,12 +80,7 @@ class objtracker():
 				(startX, startY, endX, endY) = box.astype("int")
 				cv2.rectangle(frame, (startX, startY), (endX, endY),
 					(0, 255, 0), 2)
-				#self.statfl=1
-				#self.stat.publish(self.statfl)
 				self.stat.publish(1)
-			#else:
-			#	self.statfl=0
-			#self.stat.publish(self.statfl)
 		# update our centroid tracker using the computed set of bounding
 		# box rectangles
 		objects = self.ct.update(rects)
