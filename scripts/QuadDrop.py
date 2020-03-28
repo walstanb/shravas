@@ -51,13 +51,15 @@ def logg(*args):
     #print(uname,passw)
     if(secu.auth(uname,passw)==1):
         top.Frame1.place_forget()
+        top.Head.place_forget()
         top = None
         top = Toplevel1 (root)
         test=QuadDrop_support.Gui(top)
         QuadDrop_support.init(root, top)
+        QuadDrop_support.dmode()
     elif(secu.auth(uname,passw)== -1):
         #top.Frame1.configure(background='#ff9191')
-        top.Label1.place(relx=0.194, rely=0.881, height=18, width=296)
+        top.Label1.place(relx=0.06, rely=0.720, height=18, width=210)
     #root.mainloop()
 
 def destroy_Toplevel1():
@@ -69,10 +71,10 @@ class LoginSc:
     def __init__(self, top=None):
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
-        _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
-        _fgcolor = '#000000'  # X11 color: 'black'
-        _compcolor = '#d9d9d9' # X11 color: 'gray85'
-        _ana1color = '#d9d9d9' # X11 color: 'gray85'
+        _bgcolor = '#333333'  # X11 color: 'darkgray'
+        _fgcolor = '#ffffff'  # X11 color: 'white'
+        _compcolor = '#333333' # X11 color: 'darkgray85'
+        _ana1color = '#333333' # X11 color: 'darkgray85'
         _ana2color = '#ececec' # Closest X11 color: 'gray92'
         font10 = "-family {DejaVu Sans} -size 18"
 
@@ -81,64 +83,84 @@ class LoginSc:
         top.maxsize(1905, 1050)
         top.resizable(1, 1)
         top.title("Login")
+        top.configure(bg="#222222")
 
         self.menubar = tk.Menu(top,font="TkMenuFont",bg=_bgcolor,fg=_fgcolor)
         top.configure(menu = self.menubar)
 
         self.Frame1 = tk.Frame(top)
-        self.Frame1.place(relx=0.381, rely=0.37, relheight=0.245, relwidth=0.25)
-        self.Frame1.configure(relief='groove')
-        self.Frame1.configure(borderwidth="2")
-        self.Frame1.configure(relief="groove")
-        self.Frame1.configure(cursor="fleur")
+        self.Frame1.place(relx=0.5, rely=0.5, relheight=0.18, relwidth=0.25, anchor="center")
+        self.Frame1.configure(relief='flat')
+        self.Frame1.configure(borderwidth="0")
+        self.Frame1.configure(cursor="arrow")
+        self.Frame1.configure(background=_bgcolor)
 
         self.LoginButton = tk.Button(self.Frame1)
-        self.LoginButton.place(relx=0.54, rely=0.734, height=28, width=119)
+        self.LoginButton.place(relx=0.54, rely=0.704, height=28, width=119)
         self.LoginButton.configure(activebackground="#f9f9f9")
         self.LoginButton.configure(text='''Login''')
         self.LoginButton.configure(command=logg)
+        self.LoginButton.configure(background=_bgcolor)
+        self.LoginButton.configure(foreground=_fgcolor)
+        self.LoginButton.configure(activebackground="#000000")
+        self.LoginButton.configure(activeforeground=_fgcolor)
 
         self.Username = tk.Entry(self.Frame1)
-        self.Username.place(relx=0.367, rely=0.378,height=23, relwidth=0.421)
-        self.Username.configure(background="white")
+        self.Username.place(relx=0.367, rely=0.258,height=23, relwidth=0.421)
+        #self.Username.configure(background="white")
         self.Username.configure(font="TkFixedFont")
-        self.Username.configure(selectbackground="#c4c4c4")
+        #self.Username.configure(selectbackground="#c4c4c4")
+        self.Username.configure(borderwidth="0")
+        self.Username.configure(background="#4a4a4a")
+        self.Username.configure(foreground=_fgcolor)
+        self.Username.config(insertbackground="#ffffff")
+        self.Username.configure(relief="flat")
         #self.Username.configure(state="active")
 
         self.Passw = tk.Entry(self.Frame1)
-        self.Passw.place(relx=0.367, rely=0.529,height=23, relwidth=0.421)
+        self.Passw.place(relx=0.367, rely=0.459,height=23, relwidth=0.421)
         self.Passw.configure(background="white")
         self.Passw.configure(font="TkFixedFont")
         self.Passw.configure(selectbackground="#c4c4c4")
+        self.Passw.configure(relief="flat")
+        self.Passw.configure(borderwidth="0")
         self.Passw.configure(show="•")
+        self.Passw.configure(background="#4a4a4a")
+        self.Passw.configure(foreground=_fgcolor)
+        self.Passw.config(insertbackground="#ffffff")
 
         self.Label2_8 = tk.Label(self.Frame1)
-        self.Label2_8.place(relx=0.172, rely=0.394, height=18, width=76)
+        self.Label2_8.place(relx=0.172, rely=0.274, height=18, width=76)
         self.Label2_8.configure(activebackground="#f9f9f9")
         self.Label2_8.configure(justify='right')
         self.Label2_8.configure(text='''Username''')
+        self.Label2_8.configure(background=_bgcolor , foreground=_fgcolor)
 
         self.Label2_4 = tk.Label(self.Frame1)
-        self.Label2_4.place(relx=0.172, rely=0.529, height=18, width=75)
+        self.Label2_4.place(relx=0.172, rely=0.459, height=18, width=75)
         self.Label2_4.configure(activebackground="#f9f9f9")
         self.Label2_4.configure(justify='right')
         self.Label2_4.configure(text='''Password''')
+        self.Label2_4.configure(background=_bgcolor , foreground=_fgcolor)
 
-        self.Head = tk.Label(self.Frame1)
-        self.Head.place(relx=0.072, rely=0.039, height=78, width=420)
+        self.Head = tk.Label(top)
+        #self.Head.place(relx=0.072, rely=0.039, height=78, width=420)
+        self.Head.place(relx=0.51, rely=0.30, height=200, width=700, anchor="center")
         self.Head.configure(activebackground="#f9f9f9")
         self.Head.configure(font=font10)
         self.Head.configure(text='''QuadDrop Login''')
-        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
+        self.Head.configure(background="#222222" , foreground=_fgcolor)
+        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((600, 150), PIL.Image.ANTIALIAS))
         self.Head.configure(image = Lphoto)
         self.Head.image = Lphoto
 
         top.bind('<Return>', logg)
 
         self.Label1 = tk.Label(self.Frame1)
-        self.Label1.place(relx=0.07, rely=0.750, height=18, width=210)
+        self.Label1.place(relx=0.06, rely=0.720, height=18, width=210)
         self.Label1.configure(foreground="#ff3030")
         self.Label1.configure(text='''Incorrect Username or Password !''')
+        self.Label1.configure(background=_bgcolor)
         self.Label1.place_forget()
 
         self.Username.focus_force()
