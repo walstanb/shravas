@@ -23,8 +23,8 @@ class objtracker():
 
 	def __init__(self):
 		self.stat = rospy.Publisher('snr/stat', Int32, queue_size=1)
-		rospy.Subscriber("/camera/image_raw", Image, self.process_frame)
-		#rospy.Subscriber("/whycon/image_out", Image, self.process_frame)
+		#rospy.Subscriber("/camera/image_raw", Image, self.process_frame)
+		rospy.Subscriber("/whycon/image_out", Image, self.process_frame)
 		self.image_pub=rospy.Publisher('/snr/image_out', Image, queue_size=10)
 		self.ros_bridge = cv_bridge.CvBridge()
 		
@@ -50,7 +50,7 @@ class objtracker():
 		# read the next frame from the video stream and resize it
 		frame = self.ros_bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 		#frame = vs.read()
-		frame = imutils.resize(frame, width=400)
+		frame = imutils.resize(frame, width=300)
 
 		# if the frame dimensions are None, grab them
 		if self.W is None or self.H is None:
@@ -66,6 +66,7 @@ class objtracker():
 		rects = []
 
 		# loop over the detections
+		objects=None
 		for i in range(0, detections.shape[2]):
 			# filter out weak detections by ensuring the predicted
 			# probability is greater than a minimum threshold
@@ -80,21 +81,26 @@ class objtracker():
 				(startX, startY, endX, endY) = box.astype("int")
 				cv2.rectangle(frame, (startX, startY), (endX, endY),
 					(0, 255, 0), 2)
-				self.stat.publish(1)
+				objects = self.ct.update(rects)
+				if(bool(objects)):
+					self.stat.publish(1)
+		if(objects==None):
+			self.stat.publish(0)
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(frame, 'bgr8'))
 		# update our centroid tracker using the computed set of bounding
 		# box rectangles
-		objects = self.ct.update(rects)
+
 		# loop over the tracked objects
-		for (objectID, centroid) in objects.items():
+		#for (objectID, centroid) in objects.items():
 			# draw both the ID of the object and the centroid of the
 			# object on the output frame
-			text = "ID {}".format(objectID)
-			cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
-				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-			cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+		#	text = "ID {}".format(objectID)
+		#	cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
+		#		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+		#	cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
 		# show the output frame
-		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(frame, 'bgr8'))
+		
 		#cv2.imshow("Frame", frame)
 		#key = cv2.waitKey(1) & 0xFF
 
@@ -113,3 +119,4 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
