@@ -39,4 +39,5 @@
   <node name="key_command" type="key_command.py" pkg="shravas"/>
   <node name="snr_engine" type="snrengine.py" pkg="shravas" output="screen"/>
   <node name="snr_pilot" type="snrpilot.py" pkg="shravas" output="screen"/>
+  <node name="snr" type="object_tracker.py" pkg="shravas"/>
 </launch>
