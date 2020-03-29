@@ -56,6 +56,8 @@ class ippilot():
 		self.drone_wait=1
 		self.win_distance=1.0
 		self.ground_floor=22.0
+
+
 	def check_delta(self,err_xy,err_z):
 		if((self.drone_x<(self.wp_x+err_xy)) & (self.drone_x>(self.wp_x-err_xy)) & (self.drone_y<(self.wp_y+err_xy)) & (self.drone_y>(self.wp_y-err_xy)) & (self.drone_z>(self.wp_z-err_z)) & (self.drone_z<(self.wp_z+err_z))):
 			self.counter+=1
@@ -70,26 +72,11 @@ class ippilot():
 		print(self.wp_x)
 		print(self.wp_y)
 		print(self.wp_z)
-		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
-		pose=Pose()
-		pose.position = Point(*self.coordinatespub)
-		self.msgpub.poses=[]
-		self.msgpub.poses.append(pose)
 		self.counter=0
 		while(self.counter < 100):
 			if(self.person_stuck == 1):
 				WaitAtPoint()
 			self.check_delta(deltaxy,deltaz)
-
-	def WaitAtPoint(self):
-		temp_x=self.wp_x
-		temp_y=self.wp_y
-		temp_z=self.wp_z
-		gotoloc(drone_x,drone_y,drone_z,1.0,0.3)
-		time.sleep(5)
-		gotoloc(temp_x,temp_y,temp_z,1.0,0.3
-
-
 	def search(self):
 		self.takeoffland=1
 		rospy.sleep(2)
@@ -99,7 +86,8 @@ class ippilot():
 		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
 		self.wp_z=self.ground_floor
 		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
-		self.takeoffland=0
+		self.takeoffland=-1
+		self.takeoff.publish(self.takeoffland)
 
 	## SUBSCRIBER FUNCTIONS ##
 
@@ -113,8 +101,8 @@ class ippilot():
 
 	def get_pose(self, pose):
 		if(self.homelocation==1):
-			self.home_x = pose.poses[0].position.x
-			self.home_y = pose.poses[0].position.y
+			self.wp_x = pose.poses[0].position.x
+			self.wp_y = pose.poses[0].position.y
 			self.homelocation=0
 		self.drone_x = pose.poses[0].position.x
 		self.drone_y = pose.poses[0].position.y
@@ -126,16 +114,7 @@ class ippilot():
 	def check_stuck(self, data):
 		#self.person_stuck = data.data
 		stuck = data.data
-		if(stuck == 0 and self.drone_wait == 1):
-			self.person_stuck = 0
-		elif(stuck == 0 and self.drone_wait == 0):
-			self.person_stuck = 0
-			self.drone_wait = 1
-		elif(stuck == 1 and self.drone_wait = 1):
 			self.person_stuck = 1
-			self.drone_wait = 0
-		elif(stuck = 1 and self.drone_wait = 0):
-			self.person_stuck = 0		
 			
 
 
