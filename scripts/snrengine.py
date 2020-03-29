@@ -46,7 +46,7 @@ class engine():
 
 	def __init__(self):
 		rospy.init_node('snr_engine')
-		self.flag=1
+		#self.flag=1
 
 		#Variable to flag when the PID should take control of the drone
 		self.autopilot  = False
@@ -352,44 +352,33 @@ class engine():
 			print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
-			self.flag=1
-		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			if(ddata.data == -1):
-				self.drone.land()
+			#self.flag=1
+		elif((ddata.data == 0) and self.activate_takeoff == 0):
+			self.drone.land()
 			print("Land")
 			self.activate_takeoff=1
-			self.flag=0
+			#self.flag=0
 			self.autopilot=False
 
 	def feed(self):
 		rospy.sleep(5)
 		print("Starting feed")
-		print("Starting feed")
 		self.container = av.open(self.drone.get_video_stream())
 		self.vid_stream = self.container.streams.video[0]
-		for packet in self.container.demux((self.vid_stream,)):
-			for frame in packet.decode():
-				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
-				image = imutils.resize(image, width=400)
+		# for packet in self.container.demux((self.vid_stream,)):
+		# 	for frame in packet.decode():
+		# 		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+		# 		image = imutils.resize(image, width=400)
 				
-				# find the barcodes in the frame and decode each of the barcodes
-				if(self.flag==0):
-					print("Checking for barcodes")
+		# 		# find the barcodes in the frame and decode each of the barcodes
+		# 		if(self.flag==0):
+		# 			print("Checking for barcodes")
 
-					barcodes = pyzbar.decode(image)
-					for barcode in barcodes:
-						#self.flag=1
-						barcodeData = barcode.data.decode("utf-8")
-						print(barcodeData)
-				
-
-				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
+		# 		# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
 
 
 				image = imutils.resize(image, width=720)
-				x,y = 360,270
-				image = cv2.line(image,(x,y-10),(x,y+10),(0,0,255),1)
-				image = cv2.line(image,(x-10,y),(x+10,y),(0,0,255),1)
+				
 
 				self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
