@@ -290,8 +290,9 @@ class Gui():
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
-		self.fac=1000/len(nofly.main(ls))
-		self.ctr=0
+		#self.fac=1000/len(nofly.main(ls))
+		self.fac=1000/9
+		#self.ctr=0
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
@@ -300,7 +301,7 @@ class Gui():
 		rospy.Subscriber('tello/imu', Imu, self.tello_imu)
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
-		rospy.Subscriber('/wp_cords', PoseArray, self.upd_prog_bar)
+		rospy.Subscriber('/progbar', Int16, self.upd_prog_bar)
 
 		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
@@ -368,18 +369,17 @@ class Gui():
 		self.nxt.configure(outline="#ff7b00")'''
 	
 	def upd_prog_bar(self,data):
-		if self.ctr<6:
-			self.ctr+=1
-			return
+		#if self.ctr<6:
+		#	self.ctr+=1
+		#	return
 		if(self.progbarvalue>=991):
 			self.progbarvalue=0
 			top.Progressbar.configure(value=self.progbarvalue)
-		#fac=1000/9
 		self.progbarvalue=self.progbarvalue+self.fac
 		prev=100*(self.progbarvalue-self.fac)
 		nextt=100*(self.progbarvalue)
 		for i in range(prev,nextt):
-			time.sleep(0.00001)
+			#time.sleep(0.00001)
 			#print((i+1)/1000.0)
 			top.Progressbar.configure(value=((i+1)/1000.0))
 
