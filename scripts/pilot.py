@@ -58,7 +58,7 @@ class pilot():
 
 		self.counter = 0
 		self.takeoffland = -1
-		self.cruize = 15.0
+		self.cruize = 18.0
 		self.drone_x = 0.0
 		self.drone_y = 0.0
 		self.drone_z = 24.0
@@ -76,7 +76,7 @@ class pilot():
 		self.startrun = 0
 		self.startend = 2
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
-		self.coordinates=nofly.main(self.coordinates)
+		self.coordinates1=nofly.main(self.coordinates)
 		#csvio.csvwrite(self.coordinates1,'/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
 		print(self.coordinates)
 		print(self.coordinates1)
@@ -115,6 +115,7 @@ class pilot():
 	'''
 
 	def gotoloc(self,x1,y1,z1,deltaxy,deltaz):
+		self.gui_status.publish("Travelling to new location")
 		self.wp_x=x1
 		self.wp_y=y1
 		self.wp_z=z1
@@ -123,7 +124,6 @@ class pilot():
 		pose.position = Point(*self.coordinatespub)
 		self.msgpub.poses=[]
 		self.msgpub.poses.append(pose)
-		self.gui_status.publish("Travelling to new location")
 		self.gui_status.publish(str(self.wp_x)+","+str(self.wp_y)+","+str(self.wp_z))
 		self.counter=0
 		while(self.counter < 100):
@@ -159,9 +159,8 @@ class pilot():
 			while(self.moveahead!=1):
 				if(self.qr_pub == self.coordinates[index]['qr']):
 					self.moveahead=1
-					self.gui_status.publish("Authenticated")
-					self.gui_status.publish("Qrcode Data :"+self.qr_pub)
-
+					self.gui_status.publish("Customer Authenticated")
+					#self.gui_status.publish("Qrcode Data :"+self.qr_pub)
 			rospy.sleep(5)
 			self.takeoffland=1
 			self.takeoff.publish(self.takeoffland)
@@ -182,10 +181,11 @@ class pilot():
 		
 		while(self.startend != 1):
 			rospy.sleep(0.0001)
-		rospy.sleep(10)
+		#rospy.sleep(10)
 		for index in range(len(self.coordinates)):
 			self.callbackset = index
 			if(self.coordinates[self.callbackset]['delivery'] == 0):
+				self.gui_status.publish("Takeoff")
 				self.takeoffland=1
 				self.takeoff.publish(self.takeoffland)
 				rospy.sleep(1)

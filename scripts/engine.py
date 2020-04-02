@@ -364,16 +364,14 @@ class engine():
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
 			self.drone.takeoff()
-			self.gui_status.publish("Takeoff")
-			#print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
 			#print(ddata.data)
 			if(ddata.data == -1):
-				#print("Inside if land")
 				self.autopilot=False
+				rospy.sleep(1)
 				self.drone.land()
 				self.gui_status.publish("Land")
 			self.activate_takeoff=1
@@ -408,7 +406,7 @@ class engine():
 		if(self.flag==0):
 			barcodes = pyzbar.decode(image)
 			for barcode in barcodes:
-				self.flag=1
+				#self.flag=1
 				barcodeData = barcode.data.decode("utf-8")
 				self.qrcode.publish(barcodeData)
 		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))

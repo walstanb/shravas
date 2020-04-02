@@ -37,8 +37,8 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-#wificard = "wlo1"
-wificard = "wlp2s0"
+wificard = "wlo1"
+#wificard = "wlp2s0"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
@@ -290,7 +290,8 @@ class Gui():
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
-		self.fac=1000/len(nofly.main(ls))
+		#self.fac=1000/len(nofly.main(ls))
+		self.fac=9
 		self.ctr=0
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
@@ -379,6 +380,8 @@ class Gui():
 		prev=100*(self.progbarvalue-self.fac)
 		nextt=100*(self.progbarvalue)
 		for i in range(prev,nextt):
+			#print(self.ctr)
+			#print(self.progbarvalue)
 			time.sleep(0.00001)
 			#print((i+1)/1000.0)
 			top.Progressbar.configure(value=((i+1)/1000.0))
