@@ -198,12 +198,12 @@ class pilot():
 			elif(self.coordinates[self.callbackset]['delivery'] > 0):
 				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 				self.land(0,self.callbackset)
-			elif(self.coordinates[self.callbackset]['delivery']== -2):
-				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 			elif(self.coordinates[self.callbackset]['delivery'] == -1):
 				self.gui_status.publish("ALL DELIVERIES COMPLETED GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
 				self.land(1,self.callbackset) 
+			elif(self.coordinates[self.callbackset]['qr']== 0):
+				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 			else:
 				self.gui_status.publish("BAD COORDINATES GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
