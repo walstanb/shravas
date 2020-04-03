@@ -90,8 +90,8 @@ class pilot():
 		
 		#self.coordinates=[{"x":0,"y":0,"Z":0,"qr":0,"delivery":0},{"x":-8.0,"y":4.0,"Z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"Z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"Z":0,"qr":0,"delivery":-1}]
 		self.qr_pub="no code"
-		self.last_time = 0.0
-		self.loop_time = 0.02
+		self.start_time = 0.0
+		self.end_time = 0.0
 
 	'''
 	Function Name: check_delta
@@ -159,15 +159,22 @@ class pilot():
 		self.progress.publish(0)	
 		self.takeoff.publish(self.takeoffland)
 		if(endrun==0):
+			self.start_time = time.time()
 			self.gui_status.publish("Waiting for authentication")
 			while(self.moveahead!=1):
-				if(self.qr_pub == self.coordinates[index]['qr']):
-					#self.authenticationflag = 1	# Do not remove to be uncommented when feature of invalid QR is to be used
+				self.end_time = time.time()
+				#print(self.end_time - self.start_time)
+				if((self.end_time - self.start_time) < 12):
+					if(self.qr_pub == self.coordinates[index]['qr']):
+						#self.authenticationflag = 1	# Do not remove to be uncommented when feature of invalid QR is to be used
+						self.moveahead=1
+						self.gui_status.publish("Customer Authenticated")
+					#else:						# Do not remove to be uncommented when feature of invalid QR is to be used
+					#	self.authenticationflag = 0
+				else:
 					self.moveahead=1
-					self.gui_status.publish("Customer Authenticated")
-				#else:						# Do not remove to be uncommented when feature of invalid QR is to be used
-				#	self.authenticationflag = 0
-			rospy.sleep(5)
+					self.gui_status.publish("No Customer found, taking package back to home")
+			rospy.sleep(3)
 			self.takeoffland=1
 			self.takeoff.publish(self.takeoffland)
 			self.gui_status.publish("Taking off for next destination ")
@@ -198,12 +205,12 @@ class pilot():
 			elif(self.coordinates[self.callbackset]['delivery'] > 0):
 				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 				self.land(0,self.callbackset)
+			elif(self.coordinates[self.callbackset]['delivery']== -2):
+				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 			elif(self.coordinates[self.callbackset]['delivery'] == -1):
 				self.gui_status.publish("ALL DELIVERIES COMPLETED GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
 				self.land(1,self.callbackset) 
-			elif(self.coordinates[self.callbackset]['qr']== 0):
-				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
 			else:
 				self.gui_status.publish("BAD COORDINATES GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
