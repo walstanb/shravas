@@ -176,6 +176,7 @@ class Toplevel1:
         _compcolor = '#d9d9d9' # X11 color: 'gray85'
         _ana1color = '#d9d9d9' # X11 color: 'gray85'
         _ana2color = '#ececec' # Closest X11 color: 'gray92'
+        self.fcan=2000
         self.style = ttk.Style()
         if sys.platform == "win32":
             self.style.theme_use('winnative')
@@ -356,7 +357,7 @@ class Toplevel1:
         self.XYPositionalData.configure(relief="ridge")
         self.XYPositionalData.configure(background="#ffffff")
         #self.scale=100
-        self.fcan=2000
+        
         self.XYPositionalData.configure(scrollregion=(0,0,self.fcan,self.fcan))
         self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
 
@@ -631,13 +632,10 @@ class Toplevel1:
         self.XNos.scan_mark(event.x, event.y)
         self.YNos.scan_mark(event.x, event.y)
 
-
     def scroll_move(self, event):
         self.XYPositionalData.scan_dragto(event.x, event.y, gain=1)
         self.XNos.scan_dragto(event.x, event.y, gain=1)
-        self.YNos.scan_dragto(event.x, event.y, gain=1)
-
-    
+        self.YNos.scan_dragto(event.x, event.y, gain=1)   
 
     def zoomer(self, event):
         m=[10,25,50,100,200];

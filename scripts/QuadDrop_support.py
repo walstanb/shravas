@@ -37,8 +37,8 @@ pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-wificard = "wlo1"
-#wificard = "wlp2s0"
+#wificard = "wlo1"
+wificard = "wlp2s0"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
@@ -66,12 +66,6 @@ def disable_enable_button():
 	#w.Altitude.configure(text='''40.2''')
 	w.EmStopButton.configure(state='normal' if che48.get() else 'disable')
 	w.CallbackButton.configure(state='normal' if che48.get() else 'disable')
-
-def init(top, gui, *args, **kwargs):
-	global w, top_level, root
-	w = gui
-	top_level = top
-	root = top
 
 def create_grid(event=None):
 	wid = w.fcan # Get current width of canvas
@@ -235,10 +229,10 @@ def delidetails(event):
 	w.DeliveryDetails.configure(state='disabled')
 
 def scal(x,y):
-	return x*w.sca+(w.fcan/2),(-1*y)*w.sca+(w.fcan/2)
+	return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
 
 def draw_deliv():
-	for i in range(len(ls)):
+	for i in range(1,len(ls)-1):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
 
@@ -279,6 +273,11 @@ def destroy_window():
 	top_level = None
 	sys.exit(1)
 
+def init(top, gui, *args, **kwargs):
+	global w, top_level, root
+	w = gui
+	top_level = top
+	root = top
 
 class Gui():
 	def __init__(self,obj=None):
@@ -291,7 +290,13 @@ class Gui():
 		self.nxt=None
 		self.progbarvalue=0
 		#self.fac=1000/len(nofly.main(ls))
-		self.fac=1000/9
+		fc=0
+		for i in range(len(ls)):
+			if ls[i]['delivery']>0:
+				fc+=3
+			else:
+				fc+=1
+		self.fac=1000/fc
 		#self.ctr=0
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
@@ -349,6 +354,8 @@ class Gui():
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
 
+		#draw_deliv()
+
 		scanoutput = check_output(["iwlist", wificard, "scan"])
 		ssid = "WiFi not found"
 		for line in scanoutput.split():
@@ -379,7 +386,7 @@ class Gui():
 		prev=100*(self.progbarvalue-self.fac)
 		nextt=100*(self.progbarvalue)
 		for i in range(prev,nextt):
-			#time.sleep(0.00001)
+			time.sleep(0.00001)
 			#print((i+1)/1000.0)
 			top.Progressbar.configure(value=((i+1)/1000.0))
 
@@ -491,10 +498,6 @@ class Gui():
 		top.WhyconCoords.insert('end', "\n"+msg.data)
 		top.WhyconCoords.configure(state='disabled')
 		top.WhyconCoords.see("end")
-
-
-
-
 
 if __name__ == '__main__':
 	import QuadDrop

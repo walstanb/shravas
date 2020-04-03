@@ -169,12 +169,12 @@ def main(wp):
 	rwp=[]
 	
 	#NO FLY ZONE
-	cir=nofl(0.0,0.9,0.4)
+	cir=nofl(0.0,0.9,0.3)
 
-	rwp.append({'y':wp[0]['y'],'x':wp[0]['x'],'delivery':wp[0]['delivery'],'z':wp[0]['z'],'qr':wp[0]['qr']})
-	for i in range(len(wp)-1):
-		s=pt(float(wp[i]['x']),float(wp[i]['y']))
-		d=pt(float(wp[i+1]['x']),float(wp[i+1]['y']))
+	rwp.append({'y':float(wp[0]['y']),'x':float(wp[0]['x']),'delivery':int(wp[0]['delivery']),'z':float(wp[0]['z']),'qr':wp[0]['qr']})
+	for i in range(1,len(wp)):
+		s=pt(float(wp[i-1]['x']),float(wp[i-1]['y']))
+		d=pt(float(wp[i]['x']),float(wp[i]['y']))
 		co=getWayP(s, d, cir)
 		#print("Source :",s.x,s.y)
 		#print("Dest :",d.x,d.y)
@@ -183,11 +183,11 @@ def main(wp):
 			print("path plannning not possible")
 			sys.exit(1)
 		elif (co.x==d.x and co.y==d.y):
-			rwp.append({'y':d.y,'x':d.x,'delivery':wp[i+1]['delivery'],'z':wp[i+1]['z'],'qr':wp[i+1]['qr']})
+			rwp.append({'y':d.y,'x':d.x,'delivery':int(wp[i]['delivery']),'z':float(wp[i]['z']),'qr':wp[i]['qr']})
 		elif((co.x!=s.x and co.y!=s.y) or (co.x!=d.x and co.y!=d.y)):
 			#print("inserting")
-			rwp.append({'y':co.y,'x':co.x,'delivery':0,'z':wp[i]['z'],'qr':'0'})
-			rwp.append({'y':d.y,'x':d.x,'delivery':wp[i+1]['delivery'],'z':wp[i+1]['z'],'qr':wp[i+1]['qr']})
+			rwp.append({'y':co.y,'x':co.x,'delivery':-2,'z':float(wp[i]['z']),'qr':''})
+			rwp.append({'y':d.y,'x':d.x,'delivery':int(wp[i]['delivery']),'z':float(wp[i]['z']),'qr':wp[i]['qr']})
 			
 	return rwp
 	#csvwrite(rwp,"outputcsv.csv")

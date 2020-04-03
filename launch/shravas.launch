@@ -34,4 +34,5 @@
   <node name="guimain" type="QuadDrop.py" pkg="shravas" output="screen"/>
   <node name="engine" type="engine.py" pkg="shravas" output="screen"/>
   <node name="drone_pilot" type="pilot.py" pkg="shravas" output="screen"/>
+  <!--node name="drone_pilot" type="testpilot.py" pkg="shravas" output="screen"/-->
 </launch>
