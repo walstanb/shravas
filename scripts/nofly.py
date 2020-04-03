@@ -1,5 +1,6 @@
 import sys
 from math import sqrt
+import csvio
 '''imported csv to read and write to csv file'''
 #from csvio import csvread,csvwrite
 
@@ -69,7 +70,7 @@ def getWayP(s, d, cir):
 	#s.x,s.y=s.x*10.0,s.y*10.0
 	#d.x,d.y=d.x*10.0,d.y*10.0
 	#cir.x,cir.y=cir.x*10.0,cir.y*10.0
-	cir.r=cir.r*1.3
+	#cir.r=cir.r*1.3
 
 	if(intersectsCir(s,d,cir)==False):
 		return d
@@ -168,9 +169,9 @@ def main(wp):
 	rwp=[]
 	
 	#NO FLY ZONE
-	cir=nofl(-6.7,1.5,0.0)
+	cir=nofl(0.0,0.9,0.4)
 
-	rwp.append({'y':wp[0]['y'],'x':wp[0]['x'],'delivery':1,'z':wp[0]['z'],'qr':wp[0]['qr']})
+	rwp.append({'y':wp[0]['y'],'x':wp[0]['x'],'delivery':wp[0]['delivery'],'z':wp[0]['z'],'qr':wp[0]['qr']})
 	for i in range(len(wp)-1):
 		s=pt(float(wp[i]['x']),float(wp[i]['y']))
 		d=pt(float(wp[i+1]['x']),float(wp[i+1]['y']))
@@ -182,11 +183,11 @@ def main(wp):
 			print("path plannning not possible")
 			sys.exit(1)
 		elif (co.x==d.x and co.y==d.y):
-			rwp.append({'y':d.y,'x':d.x,'delivery':1,'z':wp[i]['z'],'qr':wp[i]['qr']})
+			rwp.append({'y':d.y,'x':d.x,'delivery':wp[i+1]['delivery'],'z':wp[i+1]['z'],'qr':wp[i+1]['qr']})
 		elif((co.x!=s.x and co.y!=s.y) or (co.x!=d.x and co.y!=d.y)):
 			#print("inserting")
-			rwp.append({'y':co.y,'x':co.x,'delivery':0,'z':wp[i]['z'],'qr':''})
-			rwp.append({'y':d.y,'x':d.x,'delivery':1,'z':wp[i]['z'],'qr':wp[i]['qr']})
+			rwp.append({'y':co.y,'x':co.x,'delivery':0,'z':wp[i]['z'],'qr':'0'})
+			rwp.append({'y':d.y,'x':d.x,'delivery':wp[i+1]['delivery'],'z':wp[i+1]['z'],'qr':wp[i+1]['qr']})
 			
 	return rwp
 	#csvwrite(rwp,"outputcsv.csv")
@@ -197,8 +198,15 @@ if __name__ == '__main__':
 	Function Name:	__main__
 	Logic:        	For testing purposes only 
 	'''
-	wp=[{"x":-8.52,"y":0.14,"z":0,"qr":0,"delivery":0},{"x":-4.4,"y":2.94,"z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"z":0,"qr":0,"delivery":-1}]
+	#wp=[{"x":-8.52,"y":0.14,"z":0,"qr":0,"delivery":0},{"x":-4.4,"y":2.94,"z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"z":0,"qr":0,"delivery":-1}]
 	#cir=nofl(-6.7,1.5,2.0)
-	
+	wp=csvio.csvread('/home/walst/catkin_ws/src/shravas/src/coordinates.csv')
 	rs=main(wp)
-	print(rs[1]['x'],rs[1]['y'])
+
+	for i in range(len(wp)):
+		print(wp[i])
+	print("\n\n")
+
+	for i in range(len(rs)):
+		print(rs[i])
+	#print(rs[1]['x'],rs[1]['y'])
