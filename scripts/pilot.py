@@ -9,7 +9,7 @@ Functions:		Base engine for drone control
 Global variables:
 '''
 
-
+from std_msgs.msg import Int16
 from std_msgs.msg import Int32
 from std_msgs.msg import Float64
 import rospy
@@ -51,7 +51,7 @@ class pilot():
 		self.msgpub = PoseArray()
 		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1, latch=True)
-
+		self.progress = rospy.Publisher('/progbar', Int16, queue_size=1)
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
@@ -67,6 +67,8 @@ class pilot():
 		self.wp_x = 0.0
 		self.wp_y = 0.0
 		self.wp_z = 0.0
+		
+		#self.authenticationflag = 0 # Do not remove to be uncommented when feature of invalid QR is to be used
 
 		self.coordinatespub=[0.0,0.0,30.0]
 		pose=Pose()
@@ -128,6 +130,7 @@ class pilot():
 		self.counter=0
 		while(self.counter < 100):
 			self.check_delta(deltaxy,deltaz)
+		self.progress.publish(0)
 
 
 	'''
@@ -152,15 +155,18 @@ class pilot():
 		self.msgpub.poses.append(pose)
 		self.counter=0
 		while(self.counter < 100):
-			self.check_delta(0.5,1.5)	
+			self.check_delta(0.5,1.5)
+		self.progress.publish(0)	
 		self.takeoff.publish(self.takeoffland)
 		if(endrun==0):
 			self.gui_status.publish("Waiting for authentication")
 			while(self.moveahead!=1):
 				if(self.qr_pub == self.coordinates[index]['qr']):
+					#self.authenticationflag = 1	# Do not remove to be uncommented when feature of invalid QR is to be used
 					self.moveahead=1
 					self.gui_status.publish("Customer Authenticated")
-					#self.gui_status.publish("Qrcode Data :"+self.qr_pub)
+				#else:						# Do not remove to be uncommented when feature of invalid QR is to be used
+				#	self.authenticationflag = 0
 			rospy.sleep(5)
 			self.takeoffland=1
 			self.takeoff.publish(self.takeoffland)
@@ -181,7 +187,6 @@ class pilot():
 		
 		while(self.startend != 1):
 			rospy.sleep(0.0001)
-		#rospy.sleep(10)
 		for index in range(len(self.coordinates)):
 			self.callbackset = index
 			if(self.coordinates[self.callbackset]['delivery'] == 0):
@@ -284,6 +289,7 @@ class pilot():
 			self.counter = 0
 			while(self.counter < 100):
 				self.check_delta(0.5,1.5)
+			self.progress.publish(0)
 			self.takeoffland=1
 			self.takeoff.publish(self.takeoffland)
 			self.takeoffland=-1
