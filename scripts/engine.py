@@ -110,7 +110,7 @@ class engine():
 		#PID constants for Throttle
 		self.kp_throt = 15.0
 		self.ki_throt = 1.0
-		self.kd_throt = 2.5
+		self.kd_throt = 4.0
 
 		#Variables to selectively activate PID for pitch roll throttle
 		self.activ_roll = True
@@ -362,15 +362,14 @@ class engine():
 	'''
 
 	def takeoffland(self,ddata):
-		if(ddata.data==1 and self.activate_takeoff==1):
+		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
 			self.drone.takeoff()
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			#print(ddata.data)
 			if(ddata.data == -1):
-				self.autopilot=False
+				self.autopilot=False				
 				rospy.sleep(1)
 				self.drone.land()
 				self.gui_status.publish("Land")
@@ -380,9 +379,6 @@ class engine():
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
-		#frame = "/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/gui/logodark.png"
-		
-		
 		flag = 0
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
