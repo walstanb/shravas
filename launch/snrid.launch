@@ -1,7 +1,7 @@
 <launch>
 
   <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
-    <param name="video_device" value="/dev/video1" />
+    <param name="video_device" value="/dev/video0" />
     <param name="image_width" value="640" />
     <param name="image_height" value="480" />
     <param name="pixel_format" value="yuyv" />
@@ -36,8 +36,13 @@
     <param name="autosize" value="true" />
   </node>
 
+  <node name="image_view1" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/snr/image_out"/>
+    <param name="autosize" value="true" />
+  </node>
+
   <node name="key_command" type="key_command.py" pkg="shravas"/>
   <node name="snr_engine" type="snrengine.py" pkg="shravas" output="screen"/>
-  <node name="snr_pilot01" type="snrpilot01.py" pkg="shravas" output="screen"/>
-  <node name="snr" type="object_tracker101.py" pkg="shravas"/>
+  <node name="snr_pilotid" type="snrpilotid.py" pkg="shravas" output="screen"/>
+  <node name="snr" type="object_tracker123.py" pkg="shravas"/>
 </launch>

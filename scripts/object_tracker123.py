@@ -37,7 +37,7 @@ class objtracker():
 
 		# load our serialized model from disk
 		print("[INFO] loading model...")
-		self.net = cv2.dnn.readNetFromCaffe("/home/walst/catkin_ws/src/shravas/src/deploy.prototxt", "/home/walst/catkin_ws/src/shravas/src/res10_300x300_ssd_iter_140000.caffemodel")
+		self.net = cv2.dnn.readNetFromCaffe("/home/krut/catkin_ws/src/shravas/src/deploy.prototxt", "/home/krut/catkin_ws/src/shravas/src/res10_300x300_ssd_iter_140000.caffemodel")
 		# initialize the video stream and allow the camera sensor to warmup
 		print("[INFO] starting video stream...")
 		#vs = VideoStream(src=0).start()

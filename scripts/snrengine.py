@@ -31,7 +31,7 @@ from geometry_msgs.msg import PoseArray
 import av
 import imutils
 from pyzbar import pyzbar
-
+import threading
 
 
 class engine():
@@ -56,6 +56,9 @@ class engine():
 		self.drone = tellopy.Tello()
 		self.drone.connect()
 		self.drone.wait_for_connection(10.0)
+
+		self.container = av.open(self.drone.get_video_stream())
+		self.vid_stream = self.container.streams.video[0]
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
@@ -348,40 +351,39 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data==1 and self.activate_takeoff==1):
-			self.drone.takeoff()
+			#self.drone.takeoff()
 			print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
-			#self.flag=1
 		elif((ddata.data == 0) and self.activate_takeoff == 0):
 			self.drone.land()
 			print("Land")
 			self.activate_takeoff=1
-			#self.flag=0
 			self.autopilot=False
 
 	def feed(self):
-		rospy.sleep(5)
-		print("Starting feed")
-		self.container = av.open(self.drone.get_video_stream())
-		self.vid_stream = self.container.streams.video[0]
-		# for packet in self.container.demux((self.vid_stream,)):
-		# 	for frame in packet.decode():
-		# 		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
-		# 		image = imutils.resize(image, width=400)
-				
-		# 		# find the barcodes in the frame and decode each of the barcodes
-		# 		if(self.flag==0):
-		# 			print("Checking for barcodes")
-
-		# 		# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
-
-
-				image = imutils.resize(image, width=720)
-				
-
-				self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
-
+		flag = 0
+		for packet in self.container.demux((self.vid_stream,)):
+			for frame in packet.decode():
+				if(flag==0):
+					t0 = threading.Thread(target=self.feed_exec, args=[frame])
+					t0.start()
+					flag=1
+				elif(flag==1):
+					t1 = threading.Thread(target=self.feed_exec, args=[frame])
+					t1.start()
+					flag=2
+				else:
+					t1.join()
+					t0.join()
+					flag=0
+			
+	def feed_exec(self,frame):
+		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+		#cv2.imshow("feed", image)
+		#key = cv2.waitKey(1) & 0xFF
+		#image = imutils.resize(image, width=400)
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
 
 

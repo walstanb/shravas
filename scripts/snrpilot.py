@@ -45,17 +45,17 @@ class ippilot():
 		self.drone_z=0.0
 
 		#Change all below value according to PC coordinates
-		self.cruize = 10.0
-		self.start_point_x = 0.0
-		self.start_point_y = 0.0
-		self.start_point_z = 13.0
-		self.traverse_x = 0.4
-		self.traverse_y = 0.0
-		self.traverse_z = 0.2
-		self.top_z = 10.0 	
+		#self.cruize = 10.0
+		#self.start_point_x = 0.0
+		#self.start_point_y = 0.0
+		#self.start_point_z = 13.0
+		#self.traverse_x = 0.4
+		#self.traverse_y = 0.0
+		#self.traverse_z = 0.2
+		self.top_z = 11.0 	
 		self.drone_wait=1
-		self.win_distance=1.0
-		self.ground_floor=22.0
+		self.win_distance=1.5
+		self.ground_floor=20.0
 
 
 	def check_delta(self,err_xy,err_z):
@@ -81,6 +81,8 @@ class ippilot():
 		self.takeoffland=1
 		rospy.sleep(2)
 		self.wp_z=self.ground_floor
+		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
+		self.wp_z=self.top_z
 		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
 		self.wp_x=self.wp_x + self.win_distance
 		gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,0.3)
