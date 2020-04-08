@@ -21,6 +21,7 @@ import QuadDrop
 import imutils
 import PIL.Image, PIL.ImageTk
 import csvio
+import nofly
 from std_msgs.msg import Int16
 from std_msgs.msg import Int32
 from std_msgs.msg import Float64
@@ -29,14 +30,15 @@ from sensor_msgs.msg import Image, Imu
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
-
 import getpass
+
 global pathh
 pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
 wificard = "wlo1"
+#wificard = "wlp2s0"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
@@ -44,7 +46,7 @@ wificard = "wlo1"
 #		wificard="wlo1"
 
 global delidat,ls
-ls=csvio.csvread(pathh+"coords.csv")
+ls=csvio.csvread(pathh+"coordinates.csv")
 delidat=csvio.csvread(pathh+"deliverydata.csv")
 
 drobj = rospy.Publisher('/drone_init', Int32, queue_size=1)
@@ -64,12 +66,6 @@ def disable_enable_button():
 	#w.Altitude.configure(text='''40.2''')
 	w.EmStopButton.configure(state='normal' if che48.get() else 'disable')
 	w.CallbackButton.configure(state='normal' if che48.get() else 'disable')
-
-def init(top, gui, *args, **kwargs):
-	global w, top_level, root
-	w = gui
-	top_level = top
-	root = top
 
 def create_grid(event=None):
 	wid = w.fcan # Get current width of canvas
@@ -105,7 +101,7 @@ def dmode():
 		altcol1="#d9d9d9"
 		col2= "#ffffff"
 		col3= "#000000"
-		logo= pathh+"gui/logodark.png"
+		logo= pathh+"gui/logoo.png"
 		about= pathh+"gui/about-dark.png"
 		credits= pathh+"gui/credits-dark.png"
 		gridcol= "#4a4a4a"
@@ -117,9 +113,9 @@ def dmode():
 		altcol1="#333333"
 		col2= "#000000"
 		col3= "#ffffff"
-		logo= pathh+"gui/logoba.jpeg"
-		about= pathh+"gui/about.png"
-		credits= pathh+"gui/credits.png"
+		logo= pathh+"gui/logoo.png"
+		about= pathh+"gui/about-light.png"
+		credits= pathh+"gui/credits-light.png"
 		gridcol= "#ffffff"
 		fbarcol,bbarcol="#0078ff","#d9d9d9"
 		fsccol,bsccol="#d9d9d9","#d9d9d9"
@@ -233,10 +229,10 @@ def delidetails(event):
 	w.DeliveryDetails.configure(state='disabled')
 
 def scal(x,y):
-	return x*w.sca+(w.fcan/2),(-1*y)*w.sca+(w.fcan/2)
+	return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
 
 def draw_deliv():
-	for i in range(len(ls)):
+	for i in range(1,len(ls)-1):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
 
@@ -277,9 +273,13 @@ def destroy_window():
 	top_level = None
 	sys.exit(1)
 
+def init(top, gui, *args, **kwargs):
+	global w, top_level, root
+	w = gui
+	top_level = top
+	root = top
 
 class Gui():
-
 	def __init__(self,obj=None):
 		global top
 		top=obj
@@ -289,6 +289,16 @@ class Gui():
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
+		#self.fac=1000/len(nofly.main(ls))
+		fc=0
+		for i in range(len(ls)):
+			if ls[i]['delivery']>0:
+				fc+=3
+			else:
+				fc+=1
+		self.fac=1000/fc
+		#self.ctr=0
+
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
 		rospy.Subscriber('tello/status', TelloStatus, self.tello_status)
@@ -296,16 +306,17 @@ class Gui():
 		rospy.Subscriber('tello/imu', Imu, self.tello_imu)
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
+		rospy.Subscriber('/progbar', Int16, self.upd_prog_bar)
 
-		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoba.jpeg").resize((200, 50), PIL.Image.ANTIALIAS))
+		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
 		top.Logo.image = Lphoto
 
-		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/credits.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Cphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/credits-light.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.CreditsSlide.configure(image = Cphoto)
 		top.CreditsSlide.image = Cphoto
 
-		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/about.png").resize((857, 408), PIL.Image.ANTIALIAS))
+		Aphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/about-light.png").resize((857, 408), PIL.Image.ANTIALIAS))
 		top.AboutSlide.configure(image = Aphoto)
 		top.AboutSlide.image = Aphoto
 
@@ -343,6 +354,8 @@ class Gui():
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
 
+		#draw_deliv()
+
 		scanoutput = check_output(["iwlist", wificard, "scan"])
 		ssid = "WiFi not found"
 		for line in scanoutput.split():
@@ -361,21 +374,27 @@ class Gui():
 		'''if self.nxt!=None:
 		top.XYPositionalData.delete(self.nxt)
 		self.nxt.configure(outline="#ff7b00")'''
-	def draw_nxt(self, pose):
+	
+	def upd_prog_bar(self,data):
+		#if self.ctr<6:
+		#	self.ctr+=1
+		#	return
+		if(self.progbarvalue>=991):
+			self.progbarvalue=0
+			top.Progressbar.configure(value=self.progbarvalue)
+		self.progbarvalue=self.progbarvalue+self.fac
+		prev=100*(self.progbarvalue-self.fac)
+		nextt=100*(self.progbarvalue)
+		for i in range(prev,nextt):
+			#time.sleep(0.00001)
+			#print((i+1)/1000.0)
+			top.Progressbar.configure(value=((i+1)/1000.0))
 
-		#Code for Progressbar
-		fac=100/len(ls)
+	def draw_nxt(self, pose):
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
-			self.progbarvalue=self.progbarvalue+fac
-			#print(fac ,self.progbarvalue)
-			w.Progressbar.configure(value=self.progbarvalue)
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)
-		if(self.progbarvalue==125):
-			self.progbarvalue=0
-			w.Progressbar.configure(value=0)
-			#w.Progressbar.update()
 		self.nxt=top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15, outline="#64eb34", width=2)
 		
 
@@ -396,9 +415,6 @@ class Gui():
 		top.WhyconCoords.insert('3.0',strr)
 		top.WhyconCoords.configure(state='disabled')
 
-
-		
-
 	def delivery_data(self):
 		top.DeliveryList.insert('end',"Customer Id")
 		top.DeliveryList.insert('end',"- - - - - - - - - - - - - - - - - - - - - - - -")
@@ -407,6 +423,9 @@ class Gui():
 		#self.DeliveryDetails.configure()
 
 	def prnt_msg(self,msg):
+		if(msg.data=="Tello Connected"):
+			self.progbarvalue=0
+			top.Progressbar.configure(value=self.progbarvalue)
 		top.StatusMesaages.configure(state='normal')
 		top.StatusMesaages.configure(foreground="white")
 		top.StatusMesaages.insert('end', "\n"+msg.data)
@@ -417,10 +436,8 @@ class Gui():
 		frame = self.ros_bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		frame = imutils.resize(frame, width=656,height=405)
-		
 		photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
 		#top.Status.configure(text="Hello")
-		
 		top.DroneLiveFeed.configure(image = photo)
 		top.DroneLiveFeed.image = photo
 	
@@ -481,10 +498,6 @@ class Gui():
 		top.WhyconCoords.insert('end', "\n"+msg.data)
 		top.WhyconCoords.configure(state='disabled')
 		top.WhyconCoords.see("end")
-
-
-
-
 
 if __name__ == '__main__':
 	import QuadDrop
