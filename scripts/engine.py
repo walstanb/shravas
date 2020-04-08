@@ -370,7 +370,6 @@ class engine():
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
 			if(ddata.data == -1):
 				self.autopilot=False				
-				rospy.sleep(1)
 				self.drone.land()
 				self.gui_status.publish("Land")
 			self.activate_takeoff=1

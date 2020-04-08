@@ -30,15 +30,15 @@ from sensor_msgs.msg import Image, Imu
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
-
 import getpass
+
 global pathh
 pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 global wificard
 wc=os.listdir('/sys/class/net/')
-#wificard = "wlo1"
-wificard = "wlp2s0"
+wificard = "wlo1"
+#wificard = "wlp2s0"
 #for i in range(len(wc)):
 #	if(wc[i]!='lo'):
 #		wificard=str(wc[i])
@@ -386,7 +386,7 @@ class Gui():
 		prev=100*(self.progbarvalue-self.fac)
 		nextt=100*(self.progbarvalue)
 		for i in range(prev,nextt):
-			time.sleep(0.00001)
+			#time.sleep(0.00001)
 			#print((i+1)/1000.0)
 			top.Progressbar.configure(value=((i+1)/1000.0))
 
