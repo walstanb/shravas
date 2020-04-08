@@ -1,3 +1,5 @@
-x,y,z,qr,delivery
--9.28,-1.24,20,abcd,1
--5.8,4.4,20,cdef,1
+y,x,delivery,z,qr
+0,0,0,0,0
+0.5,-0.2,2,18,QuadDrop
+-0.2,0.7,1,18,WANK
+0,0,-1,0,0

@@ -1,7 +1,7 @@
 <launch>
 
   <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
-    <param name="video_device" value="/dev/video0" />
+    <param name="video_device" value="/dev/video1" />
     <param name="image_width" value="640" />
     <param name="image_height" value="480" />
     <param name="pixel_format" value="yuyv" />
@@ -39,4 +39,5 @@
   <node name="guimain" type="QuadDrop.py" pkg="shravas" output="screen"/>
   <node name="engine" type="engine.py" pkg="shravas" output="screen"/>
   <node name="drone_pilot" type="pilot.py" pkg="shravas" output="screen"/>
+  <!--node name="drone_pilot" type="testpilot.py" pkg="shravas" output="screen"/-->
 </launch>

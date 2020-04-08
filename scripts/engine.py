@@ -31,7 +31,7 @@ from geometry_msgs.msg import PoseArray
 import av
 import imutils
 from pyzbar import pyzbar
-
+import threading
 
 
 class engine():
@@ -56,9 +56,14 @@ class engine():
 		self.drone = tellopy.Tello()
 		self.drone.connect()
 		self.drone.wait_for_connection(10.0)
+
+		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
+		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		self.gui_status.publish("Tello Connected")
+		
 		self.container = av.open(self.drone.get_video_stream())
 		self.vid_stream = self.container.streams.video[0]
-		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
+
 		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
 		rospy.Subscriber('activation', Int32, self.takeoffland)
@@ -76,7 +81,7 @@ class engine():
 		self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
 		self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
 		self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
-		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		
 
 		
 		#Holds the current coordinates of the drone (recieved from whycon/poses)
@@ -105,7 +110,7 @@ class engine():
 		#PID constants for Throttle
 		self.kp_throt = 15.0
 		self.ki_throt = 1.0
-		self.kd_throt = 2.5
+		self.kd_throt = 4.0
 
 		#Variables to selectively activate PID for pitch roll throttle
 		self.activ_roll = True
@@ -357,18 +362,14 @@ class engine():
 	'''
 
 	def takeoffland(self,ddata):
-		if(ddata.data==1 and self.activate_takeoff==1):
-			#self.drone.takeoff()
-			self.gui_status.publish("Takeoff")
-			#print("Takeoff")
+		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
+			self.drone.takeoff()
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			#print(ddata.data)
 			if(ddata.data == -1):
-				#print("Inside if land")
-				self.autopilot=False
+				self.autopilot=False				
 				self.drone.land()
 				self.gui_status.publish("Land")
 			self.activate_takeoff=1
@@ -377,33 +378,33 @@ class engine():
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
-		
+		flag = 0
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
-				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
-				image = imutils.resize(image, width=400)
-				
-				# find the barcodes in the frame and decode each of the barcodes
-				if(self.flag==0):
-					#self.gui_status.publish("Checking for barcodes")
+				if(flag==0):
+					t0 = threading.Thread(target=self.feed_exec, args=[frame])
+					t0.start()
+					flag=1
+				elif(flag==1):
+					t1 = threading.Thread(target=self.feed_exec, args=[frame])
+					t1.start()
+					flag=2
+				else:
+					t1.join()
+					t0.join()
+					flag=0
+			
+	def feed_exec(self,frame):
+		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+		image = imutils.resize(image, width=400)
 
-					barcodes = pyzbar.decode(image)
-					for barcode in barcodes:
-						#self.flag=1
-						barcodeData = barcode.data.decode("utf-8")
-						#self.gui_status.publish(barcodeData)
-						self.qrcode.publish(barcodeData)
-
-				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
-
-
-				image = imutils.resize(image, width=720)
-
-				x,y = 360,270
-				image = cv2.line(image,(x,y-10),(x,y+10),(0,0,255),1)
-				image = cv2.line(image,(x-10,y),(x+10,y),(0,0,255),1)
-
-				self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
+		if(self.flag==0):
+			barcodes = pyzbar.decode(image)
+			for barcode in barcodes:
+				#self.flag=1
+				barcodeData = barcode.data.decode("utf-8")
+				self.qrcode.publish(barcodeData)
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
 
 
