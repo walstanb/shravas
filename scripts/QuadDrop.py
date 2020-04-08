@@ -6,9 +6,15 @@
 #    Mar 16, 2020 02:36:39 AM IST  platform: Linux
 
 import sys
+import rospy
+import secu
 import os,subprocess
 from subprocess import check_output
-import gui
+import PIL.Image, PIL.ImageTk
+
+import getpass
+global pathh
+pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
 
 try:
     import Tkinter as tk
@@ -23,35 +29,142 @@ except ImportError:
     py3 = True
 
 import QuadDrop_support
+import LoginScreen_support
 import os.path
 
 def vp_start_gui():
     '''Starting point when module is the main routine.'''
-    global val, w, root
+    global val, w, root, top
     root = tk.Tk()
+    root.attributes('-fullscreen', True)
+    root.bind("<F11>",lambda event: root.attributes("-fullscreen",not root.attributes("-fullscreen")))
+    root.bind("<Escape>",lambda event: root.attributes("-fullscreen",False))
     QuadDrop_support.set_Tk_var()
-    top = Toplevel1 (root)
-    test=gui.Gui(top)
-    QuadDrop_support.init(root, top)
+    top = LoginSc(root)
+    LoginScreen_support.init(root, top)
     root.mainloop()
 
-w = None
-def create_Toplevel1(rt, *args, **kwargs):
-    '''Starting point when module is imported by another module.
-       Correct form of call: 'create_Toplevel1(root, *args, **kwargs)' .'''
-    global w, w_win, root
-    #rt = root
-    root = rt
-    w = tk.Toplevel (root)
-    QuadDrop_support.set_Tk_var()
-    top = Toplevel1 (w)
-    QuadDrop_support.init(w, top, *args, **kwargs)
-    return (w, top)
+def logg(*args):
+    global top
+    uname=top.Username.get()
+    passw=top.Passw.get()
+    #print(uname,passw)
+    if(secu.auth(uname,passw)==1):
+        top.Frame1.place_forget()
+        top.Head.place_forget()
+        top = None
+        top = Toplevel1 (root)
+        test=QuadDrop_support.Gui(top)
+        QuadDrop_support.init(root, top)
+        QuadDrop_support.dmode()
+    elif(secu.auth(uname,passw)== -1):
+        #top.Frame1.configure(background='#ff9191')
+        top.Label1.place(relx=0.07, rely=0.728, height=18, width=210)
+    #root.mainloop()
 
 def destroy_Toplevel1():
     global w
     w.destroy()
     w = None
+
+class LoginSc:
+    def __init__(self, top=None):
+        '''This class configures and populates the toplevel window.
+           top is the toplevel containing window.'''
+        _bgcolor = '#333333'  # X11 color: 'darkgray'
+        _fgcolor = '#ffffff'  # X11 color: 'white'
+        _compcolor = '#333333' # X11 color: 'darkgray85'
+        _ana1color = '#333333' # X11 color: 'darkgray85'
+        _ana2color = '#ececec' # Closest X11 color: 'gray92'
+        font10 = "-family {DejaVu Sans} -size 18"
+
+        top.geometry("1863x1055+57+24")
+        top.minsize(1, 1)
+        top.maxsize(1905, 1050)
+        top.resizable(1, 1)
+        top.title("Login")
+        top.configure(bg="#222222")
+
+        self.menubar = tk.Menu(top,font="TkMenuFont",bg=_bgcolor,fg=_fgcolor)
+        top.configure(menu = self.menubar)
+
+        self.Frame1 = tk.Frame(top)
+        self.Frame1.place(relx=0.5, rely=0.5, relheight=0.18, relwidth=0.25, anchor="center")
+        self.Frame1.configure(relief='flat')
+        self.Frame1.configure(borderwidth="0")
+        self.Frame1.configure(cursor="arrow")
+        self.Frame1.configure(background=_bgcolor)
+
+        self.LoginButton = tk.Button(self.Frame1)
+        self.LoginButton.place(relx=0.54, rely=0.704, height=28, width=119)
+        self.LoginButton.configure(activebackground="#f9f9f9")
+        self.LoginButton.configure(text='''Login''')
+        self.LoginButton.configure(command=logg)
+        self.LoginButton.configure(background=_bgcolor)
+        self.LoginButton.configure(foreground=_fgcolor)
+        self.LoginButton.configure(activebackground="#000000")
+        self.LoginButton.configure(activeforeground=_fgcolor)
+
+        self.Username = tk.Entry(self.Frame1)
+        self.Username.place(relx=0.367, rely=0.258,height=23, relwidth=0.421)
+        #self.Username.configure(background="white")
+        self.Username.configure(font="TkFixedFont")
+        #self.Username.configure(selectbackground="#c4c4c4")
+        self.Username.configure(borderwidth="0")
+        self.Username.configure(background="#4a4a4a")
+        self.Username.configure(foreground=_fgcolor)
+        self.Username.config(insertbackground="#ffffff")
+        self.Username.configure(relief="flat")
+
+        self.Passw = tk.Entry(self.Frame1)
+        self.Passw.place(relx=0.367, rely=0.459,height=23, relwidth=0.421)
+        self.Passw.configure(background="white")
+        self.Passw.configure(font="TkFixedFont")
+        self.Passw.configure(selectbackground="#c4c4c4")
+        self.Passw.configure(relief="flat")
+        self.Passw.configure(borderwidth="0")
+        self.Passw.configure(show="•")
+        self.Passw.configure(background="#4a4a4a")
+        self.Passw.configure(foreground=_fgcolor)
+        self.Passw.config(insertbackground="#ffffff")
+
+        self.Label2_8 = tk.Label(self.Frame1)
+        self.Label2_8.place(relx=0.172, rely=0.274, height=18, width=76)
+        self.Label2_8.configure(activebackground="#f9f9f9")
+        self.Label2_8.configure(justify='right')
+        self.Label2_8.configure(text='''Username''')
+        self.Label2_8.configure(background=_bgcolor , foreground=_fgcolor)
+
+        self.Label2_4 = tk.Label(self.Frame1)
+        self.Label2_4.place(relx=0.172, rely=0.459, height=18, width=75)
+        self.Label2_4.configure(activebackground="#f9f9f9")
+        self.Label2_4.configure(justify='right')
+        self.Label2_4.configure(text='''Password''')
+        self.Label2_4.configure(background=_bgcolor , foreground=_fgcolor)
+
+        self.Head = tk.Label(top)
+        #self.Head.place(relx=0.072, rely=0.039, height=78, width=420)
+        self.Head.place(relx=0.51, rely=0.30, height=200, width=700, anchor="center")
+        self.Head.configure(activebackground="#f9f9f9")
+        self.Head.configure(font=font10)
+        self.Head.configure(text='''QuadDrop Login''')
+        self.Head.configure(background="#222222" , foreground=_fgcolor)
+        Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((600, 150), PIL.Image.ANTIALIAS))
+        self.Head.configure(image = Lphoto)
+        self.Head.image = Lphoto
+
+        top.bind('<Return>', logg)
+
+        self.Label1 = tk.Label(self.Frame1)
+        self.Label1.place(relx=0.07, rely=0.728, height=18, width=210)
+        self.Label1.configure(foreground="#ff3030")
+        self.Label1.configure(text='''Incorrect Username or Password !''')
+        self.Label1.configure(background=_bgcolor)
+        self.Label1.place_forget()
+
+        self.Username.focus_force()
+
+
 
 class Toplevel1:
     def __init__(self, top=None):
@@ -63,6 +176,7 @@ class Toplevel1:
         _compcolor = '#d9d9d9' # X11 color: 'gray85'
         _ana1color = '#d9d9d9' # X11 color: 'gray85'
         _ana2color = '#ececec' # Closest X11 color: 'gray92'
+        self.fcan=2000
         self.style = ttk.Style()
         if sys.platform == "win32":
             self.style.theme_use('winnative')
@@ -137,8 +251,9 @@ class Toplevel1:
         self.DeliveryList.place(relx=0.023, rely=0.048, relheight=0.914
                 , relwidth=0.26)
         self.DeliveryList.configure(background="white")
-        self.DeliveryList.configure(font="TkFixedFont")
+        self.DeliveryList.configure(font="TkFixedFont 11")
         self.DeliveryList.configure(selectbackground="#c4c4c4")
+        self.DeliveryList.bind('<<ListboxSelect>>',QuadDrop_support.delidetails)
 
         self.DeliveryDetails = tk.Text(self.DeliveryDetailsPage)
         self.DeliveryDetails.place(relx=0.314, rely=0.05, relheight=0.907
@@ -147,27 +262,27 @@ class Toplevel1:
         self.DeliveryDetails.configure(blockcursor="1")
         self.DeliveryDetails.configure(cursor="arrow")
         self.DeliveryDetails.configure(exportselection="0")
-        self.DeliveryDetails.configure(font="TkTextFont")
+        self.DeliveryDetails.configure(font="TkTextFont 11")
         self.DeliveryDetails.configure(selectbackground="#c4c4c4")
         self.DeliveryDetails.configure(state='disabled')
         self.DeliveryDetails.configure(wrap="word")
 
-        self.TelloEventsFrame = ttk.Labelframe(self.DroneFlightDataPage)
-        self.TelloEventsFrame.place(relx=0.012, rely=0.024, relheight=0.298
+        self.WhyconCoordsFrame = ttk.Labelframe(self.DroneFlightDataPage)
+        self.WhyconCoordsFrame.place(relx=0.012, rely=0.024, relheight=0.298
                 , relwidth=0.974)
-        self.TelloEventsFrame.configure(relief='')
-        self.TelloEventsFrame.configure(text='''Tello Events''')
+        self.WhyconCoordsFrame.configure(relief='')
+        self.WhyconCoordsFrame.configure(text='''Whycon Coordinates''')
 
-        self.TelloEvents = tk.Text(self.TelloEventsFrame)
-        self.TelloEvents.place(relx=0.012, rely=0.164, relheight=0.754
+        self.WhyconCoords = tk.Text(self.WhyconCoordsFrame)
+        self.WhyconCoords.place(relx=0.012, rely=0.164, relheight=0.754
                 , relwidth=0.976, bordermode='ignore')
-        self.TelloEvents.configure(background="white")
-        self.TelloEvents.configure(blockcursor="1")
-        self.TelloEvents.configure(cursor="arrow")
-        self.TelloEvents.configure(font="TkTextFont")
-        self.TelloEvents.configure(selectbackground="#c4c4c4")
-        self.TelloEvents.configure(state='disabled')
-        self.TelloEvents.configure(wrap="word")
+        self.WhyconCoords.configure(background="white")
+        self.WhyconCoords.configure(blockcursor="1")
+        self.WhyconCoords.configure(cursor="arrow")
+        self.WhyconCoords.configure(font="TkTextFont")
+        self.WhyconCoords.configure(selectbackground="#c4c4c4")
+        self.WhyconCoords.configure(state='disabled')
+        self.WhyconCoords.configure(wrap="word")
 
         self.Canvas3 = tk.Canvas(self.DroneFlightDataPage)
         self.Canvas3.place(relx=0.488, rely=0.349, relheight=0.617
@@ -220,34 +335,68 @@ class Toplevel1:
         self.XYPositionalDataFrame.configure(relief='')
         self.XYPositionalDataFrame.configure(text='''XY Positional Data''')
 
-        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=1.0, style='Horizontal.TScale')
+        self.Scale = ttk.Scale(self.XYPositionalDataFrame, from_=0, to=4, style='sc.Horizontal.TScale')
         self.Scale.place(relx=0.022, rely=0.947, relwidth=0.958, relheight=0.0
                 , height=17, bordermode='ignore')
         self.Scale.configure(takefocus="")
         self.Scale.configure(cursor="sb_h_double_arrow")
+        #self.style.configure('sc.Horizontal.TScale',tickinterval=10)
+        
+        self.sca=100
+        self.zmm=self.sca/2
+        #self.Scale.configure(variable=self.sca)
+        self.Scale.set(2)
+        self.Scale.configure(command=self.zoomer)
+        #self.sca=tk.IntVar()
         
 
         self.XYPositionalData = tk.Canvas(self.XYPositionalDataFrame)
-        self.XYPositionalData.place(relx=0.022, rely=0.051, relheight=0.857, relwidth=0.959, bordermode='ignore')
-        self.XYPositionalData.configure(borderwidth="2")
+        self.XYPositionalData.place(relx=0.022, rely=0.051, relheight=0.86, relwidth=0.959, bordermode='ignore')
+        #self.XYPositionalData.configure(borderwidth="2")
         self.XYPositionalData.configure(cursor="crosshair")
         self.XYPositionalData.configure(relief="ridge")
         self.XYPositionalData.configure(background="#ffffff")
-        self.XYPositionalData.configure(scrollregion=(0,0,2000,2000))
+        #self.scale=100
+        
+        self.XYPositionalData.configure(scrollregion=(0,0,self.fcan,self.fcan))
         self.XYPositionalData.bind('<Configure>', QuadDrop_support.create_grid)
+
+        self.XNos = tk.Canvas(self.XYPositionalDataFrame)
+        self.XNos.place(relx=0.022, rely=0.051, relheight=0.04, relwidth=0.959, bordermode='ignore')
+        self.XNos.configure(background="#ffffff")
+        self.XNos.bind('<Configure>', QuadDrop_support.create_nos)
+        self.XNos.configure(scrollregion=(0,0,self.fcan,25))
+
+        self.YNos = tk.Canvas(self.XYPositionalDataFrame)
+        self.YNos.place(relx=0.022, rely=0.051, relheight=0.86, relwidth=0.023, bordermode='ignore')
+        self.YNos.configure(background="#ffffff")
+        self.YNos.bind('<Configure>', QuadDrop_support.create_nos)
+        self.YNos.configure(scrollregion=(0,0,25,self.fcan))
+
 
         #self.xsb.grid(row=1, column=0, sticky="ew")
         #self.ysb.grid(row=0, column=1, sticky="ns")
         #self.XYPositionalData.grid(row=200, column=200, sticky="nsew")
         #self.grid_rowconfigure(0, weight=1)
         #self.grid_columnconfigure(0, weight=1)
+        self.XNos.bind("<ButtonPress-1>", self.scroll_start)
+        self.XNos.bind("<B1-Motion>", self.scroll_move)
+        self.YNos.bind("<ButtonPress-1>", self.scroll_start)
+        self.YNos.bind("<B1-Motion>", self.scroll_move)
         self.XYPositionalData.bind("<ButtonPress-1>", self.scroll_start)
         self.XYPositionalData.bind("<B1-Motion>", self.scroll_move)
+        #self.XYPositionalData.bind("<Button-4>", self.zoomerP)
+        #self.XYPositionalData.bind("<Button-5>", self.zoomerM)
+        self.XYPositionalData.xview_moveto(0.3)
+        self.XNos.xview_moveto(0.3)
+        self.XYPositionalData.yview_moveto(0.37)
+        self.YNos.yview_moveto(0.37)
 
         self.Progressbar = ttk.Progressbar(top, style="Horizontal.TProgressbar")
         self.Progressbar.place(relx=0.236, rely=0.957, relwidth=0.733
                 , relheight=0.0, height=20)
         self.Progressbar.configure(length="1365")
+        self.Progressbar.configure(value="0")
 
 
         self.Hud = ttk.Frame(top)
@@ -397,7 +546,7 @@ class Toplevel1:
         self.EmStopButton.configure(background="#ff2424")   
         self.EmStopButton.configure(cursor="hand1")
         self.EmStopButton.configure(state='disabled')
-        self.EmStopButton.configure(command=gui.emstop)
+        self.EmStopButton.configure(command=QuadDrop_support.emstop)
         self.EmStopButton.configure(text='''Emergency Stop''')
 
         self.Logo = tk.Label(top)
@@ -426,7 +575,7 @@ class Toplevel1:
         self.StartButton.configure(activebackground="#45ed61")
         self.StartButton.configure(activeforeground="#ffffff")
         self.StartButton.configure(cursor="hand1")
-        self.StartButton.configure(command=gui.start)
+        self.StartButton.configure(command=QuadDrop_support.start)
         self.StartButton.configure(text='''Start''')
 
         self.ConnectButton = tk.Button(top)
@@ -453,50 +602,58 @@ class Toplevel1:
 
 
         self.AboutSlide = tk.Label(self.AboutPage)
-        self.AboutSlide.place(relx=0.0, rely=0.0, height=408, width=857)
+        self.AboutSlide.place(relx=0.5, rely=0.5, height=408, width=857, anchor="center")
         self.AboutSlide.configure(relief="flat", borderwidth="0")
 
         self.CreditsSlide = tk.Label(self.CreditsPage)
-        self.CreditsSlide.place(relx=0.0, rely=0.0, height=408, width=857)
+        self.CreditsSlide.place(relx=0.5, rely=0.5, height=408, width=857, anchor="center")
         self.CreditsSlide.configure(relief="flat", borderwidth="0")
         #self.Error.place_forget()
 
         self.CallbackButton = tk.Button(top)
         self.CallbackButton.place(relx=0.134, rely=0.952, height=28, width=169)
-        self.CallbackButton.configure(activebackground="#f9f9f9")
-        self.CallbackButton.configure(text='''Callback''')
+        self.CallbackButton.configure(activebackground="#ff4545")
+        self.CallbackButton.configure(activeforeground="white")
+        self.CallbackButton.configure(background="#ff2424")   
+        self.CallbackButton.configure(cursor="hand1")
+        self.CallbackButton.configure(command=QuadDrop_support.callback)
+        self.CallbackButton.configure(text='''Emergency Callback''')
         self.CallbackButton.configure(state='disabled')
+
         self.colorflag=0
         self.dmodeButton = tk.Button(top)
         self.dmodeButton.place(relx=0.975, rely=0.952, height=28, width=29)
         self.dmodeButton.configure(command=QuadDrop_support.dmode)
-        
-        
-
-        scanoutput = check_output(["iwlist", "wlp2s0", "scan"])
-        ssid = "WiFi not found"
-        for line in scanoutput.split():
-          line = line.decode("utf-8")
-          if line[:5]  == "ESSID":
-            ssid = line.split('"')[1]
-
-        if(ssid=="QuadDrop"):
-            self.ConnectButton.place_forget()
-            self.Status.configure(text='''Connected''', foreground="#2cbc00")
-        else:
-            self.Status.configure(text="Disconnected",foreground="#ff0000")
+        self.dmodeButton.configure(activebackground="#333333")
 
 
     def scroll_start(self, event):
         self.XYPositionalData.scan_mark(event.x, event.y)
+        self.XNos.scan_mark(event.x, event.y)
+        self.YNos.scan_mark(event.x, event.y)
 
     def scroll_move(self, event):
         self.XYPositionalData.scan_dragto(event.x, event.y, gain=1)
+        self.XNos.scan_dragto(event.x, event.y, gain=1)
+        self.YNos.scan_dragto(event.x, event.y, gain=1)   
+
+    def zoomer(self, event):
+        m=[10,25,50,100,200];
+        self.zmm=m[int(self.Scale.get())]
+        QuadDrop_support.create_grid()
+        
+        #self.XYPositionalData.scale("all", 444, 245, 1.1, 1.1)
+    
+    def zoomerP(self,event):
+        self.XYPositionalData.scale("all", event.x, event.y, 1.1, 1.1)
+        #print(event.x, event.y)
+        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
+
+    def zoomerM(self,event):
+        self.XYPositionalData.scale("all", event.x, event.y, 0.9, 0.9)
+        #print(event.x, event.y)
+        self.XYPositionalData.configure(scrollregion = self.XYPositionalData.bbox("all"))
 
 if __name__ == '__main__':
+    rospy.init_node('guimain')
     vp_start_gui()
-
-
-
-
-

@@ -31,7 +31,7 @@ from geometry_msgs.msg import PoseArray
 import av
 import imutils
 from pyzbar import pyzbar
-
+import threading
 
 
 class engine():
@@ -45,7 +45,7 @@ class engine():
 	'''
 
 	def __init__(self):
-		rospy.init_node('engine')
+		
 		self.flag=1
 
 		#Variable to flag when the PID should take control of the drone
@@ -58,9 +58,13 @@ class engine():
 		self.drone.wait_for_connection(10.0)
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
-		rospy.Subscriber('/wp/x', Float64, self.getcoordx)
-		rospy.Subscriber('/wp/y', Float64, self.getcoordy)
-		rospy.Subscriber('/wp/z', Float64, self.getcoordz)
+		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		self.gui_status.publish("Tello Connected")
+		
+		self.container = av.open(self.drone.get_video_stream())
+		self.vid_stream = self.container.streams.video[0]
+
+		rospy.Subscriber('/wp_cords', PoseArray, self.getcoords)
 		rospy.Subscriber('/whycon/poses', PoseArray, self.autocontrol)
 		rospy.Subscriber('activation', Int32, self.takeoffland)
 		rospy.Subscriber('/input_key', Int16, self.manual)
@@ -74,10 +78,10 @@ class engine():
 		self.image_pub = rospy.Publisher('drone_feed', Image, queue_size=10, latch=True)
 		self.stats = rospy.Publisher('/stats', String, queue_size=1, latch=True)
 
-		#self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
-		#self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
-		#self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
-		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
+		self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
+		self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
+		self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
+		
 
 		
 		#Holds the current coordinates of the drone (recieved from whycon/poses)
@@ -106,7 +110,7 @@ class engine():
 		#PID constants for Throttle
 		self.kp_throt = 15.0
 		self.ki_throt = 1.0
-		self.kd_throt = 2.5
+		self.kd_throt = 4.0
 
 		#Variables to selectively activate PID for pitch roll throttle
 		self.activ_roll = True
@@ -343,30 +347,11 @@ class engine():
 	Example Call:	getcoordx(x)
 	'''
 
-	def getcoordx(self,x):
-		self.wp_x=x.data
-
-	'''	
-	Function Name:	getcoordy
-	Input: 			y axis value from pilot
-	Output: 		value assigned to y of waypoint
-	Logic: 			copy the values from published y to y of waypoint
-	Example Call:	getcoordy(y)
-	'''
-
-	def getcoordy(self,y):
-		self.wp_y=y.data
-
-	'''	
-	Function Name:	getcoordz
-	Input: 			z axis value from pilot
-	Output: 		value assigned to z of waypoint
-	Logic: 			copy the values from published z to z of waypoint
-	Example Call:	getcoordz
-	'''
-
-	def getcoordz(self,z):
-		self.wp_z=z.data
+	def getcoords(self,pose):
+		self.wp_x=pose.poses[0].position.x
+		self.wp_y=pose.poses[0].position.y
+		self.wp_z=pose.poses[0].position.z
+		
 
 	'''	
 	Function Name:	takeoffland
@@ -377,53 +362,49 @@ class engine():
 	'''
 
 	def takeoffland(self,ddata):
-		if(ddata.data==1 and self.activate_takeoff==1):
+		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
 			self.drone.takeoff()
-			self.gui_status.publish("Takeoff")
-			print("Takeoff")
 			self.activate_takeoff=0
 			self.autopilot = True
 			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			self.autopilot=False
 			if(ddata.data == -1):
-				print("Inside if land")
+				self.autopilot=False				
 				self.drone.land()
-			self.gui_status.publish("Land")
+				self.gui_status.publish("Land")
 			self.activate_takeoff=1
 			self.flag=0
 			
 
 	def feed(self):
 		self.gui_status.publish("Starting feed")
-		self.container = av.open(self.drone.get_video_stream())
-		self.vid_stream = self.container.streams.video[0]
+		flag = 0
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
-				image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
-				image = imutils.resize(image, width=400)
-				
-				# find the barcodes in the frame and decode each of the barcodes
-				if(self.flag==0):
-					self.gui_status.publish("Checking for barcodes")
+				if(flag==0):
+					t0 = threading.Thread(target=self.feed_exec, args=[frame])
+					t0.start()
+					flag=1
+				elif(flag==1):
+					t1 = threading.Thread(target=self.feed_exec, args=[frame])
+					t1.start()
+					flag=2
+				else:
+					t1.join()
+					t0.join()
+					flag=0
+			
+	def feed_exec(self,frame):
+		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+		image = imutils.resize(image, width=400)
 
-					barcodes = pyzbar.decode(image)
-					for barcode in barcodes:
-						#self.flag=1
-						barcodeData = barcode.data.decode("utf-8")
-						self.gui_status.publish(barcodeData)
-				
-
-				# PUBLISH SOMETHING ELSE OR CHANGE THE BARCODE DATA ONCE AGAIN
-
-
-				image = imutils.resize(image, width=720)
-
-				x,y = 360,270
-				image = cv2.line(image,(x,y-10),(x,y+10),(0,0,255),1)
-				image = cv2.line(image,(x-10,y),(x+10,y),(0,0,255),1)
-
-				self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
+		if(self.flag==0):
+			barcodes = pyzbar.decode(image)
+			for barcode in barcodes:
+				#self.flag=1
+				barcodeData = barcode.data.decode("utf-8")
+				self.qrcode.publish(barcodeData)
+		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))
 
 
 
@@ -512,7 +493,7 @@ class engine():
 			cmd_vspeed_ratio=None,
 			cmd_fast_mode=None,
 		)
-		#self.pub_status.publish(msg)
+		self.pub_status.publish(msg)
 
 	def cb_data_log(self, event, sender, data, **args):
 		time_cb = rospy.Time.now()
@@ -538,7 +519,7 @@ class engine():
 		odom_msg.twist.twist.angular.y = data.imu.gyro_y
 		odom_msg.twist.twist.angular.z = data.imu.gyro_z
 				
-		#self.pub_odom.publish(odom_msg)
+		self.pub_odom.publish(odom_msg)
 		
 		imu_msg = Imu()
 		imu_msg.header.stamp = time_cb
@@ -555,7 +536,7 @@ class engine():
 		imu_msg.linear_acceleration.y = data.imu.acc_y
 		imu_msg.linear_acceleration.z = data.imu.acc_z
 		
-		#self.pub_imu.publish(imu_msg)
+		self.pub_imu.publish(imu_msg)
 
 	def manual(self, msg):
 		self.key_value = msg.data
@@ -684,11 +665,23 @@ Output:			none
 Logic:			initializes send_data and starts autocontrol if the drone is not shut down
 Example Call:	called automatically
 '''
+var=0
+def enginit(msg):
+	global var
+	if (msg.data==1):
+		var=1
+	else:
+		var=0
 
 if __name__ == '__main__':
-	test = engine()
-	test.feed()
-	sys.exit(1)
+	rospy.init_node('engine')
+	rospy.Subscriber('/eng_init', Int32, enginit)
+	while(True):
+		if (var == 1):
+			test = engine()
+			test.feed()
+			sys.exit(1)
+
 
 
 
