@@ -285,19 +285,16 @@ class Gui():
 		top=obj
 		self.ros_bridge = cv_bridge.CvBridge()
 		self.point=None
-		#self.draw_deliv()
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
-		#self.fac=1000/len(nofly.main(ls))
 		fc=0
 		for i in range(len(ls)):
-			if ls[i]['delivery']>0:
+			if ls[i]['delivery'] > 0:
 				fc+=3
-			else:
+			elif ls[i]['delivery'] < 0:
 				fc+=1
-		self.fac=1000/fc
-		#self.ctr=0
+		self.fac=100/8
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
@@ -353,42 +350,12 @@ class Gui():
 		top.WhyconCoords.configure(state='normal')
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
-
-		#draw_deliv()
-
-		scanoutput = check_output(["iwlist", wificard, "scan"])
-		ssid = "WiFi not found"
-		for line in scanoutput.split():
-		  line = line.decode("utf-8")
-		  if line[:5]  == "ESSID":
-			ssid = line.split('"')[1]
-
-		if(ssid=="QuadDrop"):
-			top.ConnectButton.place_forget()
-			top.Status.configure(text='''Connected''', foreground="#2cbc00")
-			draw_deliv()
-			eng.publish(1)
-		else:
-			top.Status.configure(text="Disconnected",foreground="#ff0000")
-
-		'''if self.nxt!=None:
-		top.XYPositionalData.delete(self.nxt)
-		self.nxt.configure(outline="#ff7b00")'''
 	
 	def upd_prog_bar(self,data):
-		#if self.ctr<6:
-		#	self.ctr+=1
-		#	return
-		if(self.progbarvalue>=991):
-			self.progbarvalue=0
-			top.Progressbar.configure(value=self.progbarvalue)
 		self.progbarvalue=self.progbarvalue+self.fac
-		prev=100*(self.progbarvalue-self.fac)
-		nextt=100*(self.progbarvalue)
-		for i in range(prev,nextt):
-			#time.sleep(0.00001)
-			#print((i+1)/1000.0)
-			top.Progressbar.configure(value=((i+1)/1000.0))
+		if(self.progbarvalue > 90):
+			self.progbarvalue = 100
+		top.Progressbar.configure(value=(self.progbarvalue))
 
 	def draw_nxt(self, pose):
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)

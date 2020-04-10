@@ -4,8 +4,7 @@ import getpass
 def encrypt(msg):
 	result=""
 	count = -1
-	a = 17
-	r = 7
+	a,r = 17,7
 	for index in msg:
 		count+=1
 		temp = ord(index)

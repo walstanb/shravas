@@ -74,7 +74,7 @@ class engine():
 		self.drone.subscribe(self.drone.EVENT_LOG_DATA, self.cb_data_log)
 
 		self.droneobject = rospy.Publisher('/drone_ref', String, queue_size=1, latch=True)
-		self.qrcode = rospy.Publisher('/qr', String, queue_size=1, latch=True)
+		self.qrcode = rospy.Publisher('/qr', String, queue_size=1)
 		self.image_pub = rospy.Publisher('drone_feed', Image, queue_size=10, latch=True)
 		self.stats = rospy.Publisher('/stats', String, queue_size=1, latch=True)
 
@@ -363,10 +363,10 @@ class engine():
 
 	def takeoffland(self,ddata):
 		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
+			self.flag=1
 			self.drone.takeoff()
 			self.activate_takeoff=0
 			self.autopilot = True
-			self.flag=1
 		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
 			if(ddata.data == -1):
 				self.autopilot=False				
@@ -401,7 +401,6 @@ class engine():
 		if(self.flag==0):
 			barcodes = pyzbar.decode(image)
 			for barcode in barcodes:
-				#self.flag=1
 				barcodeData = barcode.data.decode("utf-8")
 				self.qrcode.publish(barcodeData)
 		self.image_pub.publish(self.ros_bridge.cv2_to_imgmsg(image, 'bgr8'))

@@ -57,8 +57,6 @@ class pilot():
 		self.home_y = 0.0
 		self.startend = 2
 
-		#self.authenticationflag = 0 # Do not remove to be uncommented when feature of invalid QR is to be used
-
 		self.coordinatespub=[0.0,0.0,30.0]
 		self.create_pose_array()
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
@@ -71,7 +69,7 @@ class pilot():
 			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
 			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
 		
-		self.qr_pub="no code"
+		self.qr_pub=None
 
 	'''
 	Function Name: check_delta
@@ -113,22 +111,26 @@ class pilot():
 	'''
 	
 	def check_qr(self,index):
-		moveahead=0
+		moveahead = -1
+		self.qr_pub = None
 		start_time = time.time()
 		while(moveahead!=1):
 			end_time = time.time()
 			if((end_time - start_time) < 12):
-				if(self.qr_pub == self.coordinates[index]['qr']):
-					#self.authenticationflag = 1	# Do not remove to be uncommented when feature of invalid QR is to be used
+				if(self.startend != 1):
 					moveahead=1
+					self.gui_status.publish("Emergency ! Going back home")
+				elif(self.qr_pub == self.coordinates[index]['qr']):	
+					moveahead = 1
 					self.gui_status.publish("Customer Authenticated")
-				#else:						# Do not remove to be uncommented when feature of invalid QR is to be used
-					#self.authenticationflag = 0
+				elif(moveahead == -1 and self.qr_pub is not None):						
+					moveahead = 0
+					self.gui_status.publish("Invalid QR code")
+					start_time = time.time()
 			else:
 				moveahead=1
 				self.gui_status.publish("No Customer found, taking package back to home")
-			if(self.startend!=1):
-				moveahead=1
+			
 
 	'''
 	Function Name:	land
@@ -139,7 +141,7 @@ class pilot():
 	'''		
 
 	def land(self,endrun,index):
-		if(endrun == 1):
+		if(endrun == 1 or self.startend != 1):
 			self.takeoffland = -1
 		else:
 			self.takeoffland = 0
@@ -149,7 +151,8 @@ class pilot():
 			self.check_delta(self.coordinatespub[0],self.coordinatespub[1],self.coordinatespub[2],0.5,1.5)	
 			self.gui_status.publish("Waiting for authentication")			
 			self.check_qr(index)
-			rospy.sleep(3)
+			if(self.startend == 1):
+				rospy.sleep(3)
 			self.takeoffland=1
 			self.gui_status.publish("Taking off for next destination ")
 				
@@ -169,7 +172,7 @@ class pilot():
 
 		for index in range(len(self.coordinates)):
 			
-			if(self.startend!=1):
+			if(self.startend == -1):
 				break
 			elif(self.coordinates[index]['delivery'] == 0):
 				self.gui_status.publish("Takeoff")
