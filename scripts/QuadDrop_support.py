@@ -31,10 +31,10 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseArray
 from tello_driver.msg import TelloStatus
 import getpass
+import threading
 
 global pathh
 pathh="/home/"+getpass.getuser()+"/catkin_ws/src/shravas/src/"
-
 global wificard
 wc=os.listdir('/sys/class/net/')
 wificard = "wlo1"
@@ -280,9 +280,20 @@ def init(top, gui, *args, **kwargs):
 	root = top
 
 class Gui():
+	def increase_progbar(self):
+		while(self.progbarvalue!=1000):
+			prev=10*(self.fac*(self.counter-1))
+			if(self.progbarvalue > 900):
+				self.progbarvalue = 1000
+			nextt=10*(self.progbarvalue)
+			for i in range(prev,nextt):
+				time.sleep(0.001)
+				top.Progressbar.configure(value=((i+1)/100.0))
+
 	def __init__(self,obj=None):
 		global top
 		top=obj
+		self.counter=1
 		self.ros_bridge = cv_bridge.CvBridge()
 		self.point=None
 		self.delivery_data()
@@ -294,7 +305,9 @@ class Gui():
 				fc+=3
 			elif ls[i]['delivery'] < 0:
 				fc+=1
-		self.fac=100/8
+		self.fac=1000/7
+		t1 = threading.Thread(target=self.increase_progbar)
+		t1.start()
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
@@ -352,13 +365,13 @@ class Gui():
 		top.WhyconCoords.configure(state='disabled')
 	
 	def upd_prog_bar(self,data):
-		self.progbarvalue=self.progbarvalue+self.fac
-		if(self.progbarvalue > 90):
-			self.progbarvalue = 100
-		top.Progressbar.configure(value=(self.progbarvalue))
+		self.progbarvalue+=self.fac
+		self.counter+=1
 
 	def draw_nxt(self, pose):
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
+		if(pose.poses[0].position.x == 0.0 and pose.poses[0].position.y == 0.0 and pose.poses[0].position.z == 0.0):
+			return
 		if self.nxt!=None:
 			top.XYPositionalData.delete(self.nxt)
 			self.nxt=top.XYPositionalData.create_oval(self.prevx-15, self.prevy-15, self.prevx+15, self.prevy+15, outline="#ff7b00", width=2)

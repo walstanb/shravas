@@ -47,10 +47,7 @@ class engine():
 	def __init__(self):
 		
 		self.flag=1
-
-		#Variable to flag when the PID should take control of the drone
 		self.autopilot  = False
-
 		self.activate_takeoff = 1
 
 		self.drone = tellopy.Tello()
@@ -69,7 +66,6 @@ class engine():
 		rospy.Subscriber('activation', Int32, self.takeoffland)
 		rospy.Subscriber('/input_key', Int16, self.manual)
 
-
 		self.drone.subscribe(self.drone.EVENT_FLIGHT_DATA, self.cb_status_log)
 		self.drone.subscribe(self.drone.EVENT_LOG_DATA, self.cb_data_log)
 
@@ -81,9 +77,7 @@ class engine():
 		self.pub_status = rospy.Publisher('tello/status', TelloStatus, queue_size=1)
 		self.pub_odom = rospy.Publisher('tello/odom', Odometry, queue_size=1)
 		self.pub_imu = rospy.Publisher('tello/imu', Imu, queue_size=1)
-		
-
-		
+				
 		#Holds the current coordinates of the drone (recieved from whycon/poses)
 		self.drone_x = 0
 		self.drone_y = 0
@@ -138,13 +132,7 @@ class engine():
 		self.ros_bridge = cv_bridge.CvBridge()
 
 
-
-
-
-########################   AUTOPILOT    ########################	
-
-
-
+###########################################################   AUTOPILOT    #############################################################	
 
 
 	'''
@@ -189,7 +177,6 @@ class engine():
 			return min_value
 		else:
 			return input_value
-
 			
 	'''
 	Function Name: calc_pid
@@ -275,14 +262,7 @@ class engine():
 
 
 
-
-
-
-
-########################   SUBSCRIBER FUNCTIONS    ########################	
-
-
-
+#####################################################   SUBSCRIBER FUNCTIONS    #######################################################	
 
 
 	'''
@@ -362,16 +342,15 @@ class engine():
 	'''
 
 	def takeoffland(self,ddata):
+		if(ddata.data == -1):
+			self.autopilot=False				
+			self.drone.land()
 		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
 			self.flag=1
 			self.drone.takeoff()
 			self.activate_takeoff=0
 			self.autopilot = True
-		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):
-			if(ddata.data == -1):
-				self.autopilot=False				
-				self.drone.land()
-				self.gui_status.publish("Land")
+		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):	
 			self.activate_takeoff=1
 			self.flag=0
 			
@@ -407,15 +386,7 @@ class engine():
 
 
 
-
-
-
-
-
-########################   MANUAL CONTROL    ########################	
-
-
-
+########################################################   MANUAL CONTROL    ###########################################################	
 
 
 	'''
@@ -445,97 +416,7 @@ class engine():
 	Example Call:  	emergencycontrol(data)
 	'''
 
-	def cb_status_log(self, event, sender, data, **args):
-		speed_horizontal_mps = math.sqrt(
-			data.north_speed*data.north_speed+data.east_speed*data.east_speed)/10.
-
-		# TODO: verify outdoors: anecdotally, observed that:
-		# data.east_speed points to South
-		# data.north_speed points to East
-		msg = TelloStatus(
-			height_m=data.height/10.,
-			speed_northing_mps=-data.east_speed/10.,
-			speed_easting_mps=data.north_speed/10.,
-			speed_horizontal_mps=speed_horizontal_mps,
-			speed_vertical_mps=-data.ground_speed/10.,
-			flight_time_sec=data.fly_time/10.,
-			imu_state=data.imu_state,
-			pressure_state=data.pressure_state,
-			down_visual_state=data.down_visual_state,
-			power_state=data.power_state,
-			battery_state=data.battery_state,
-			gravity_state=data.gravity_state,
-			wind_state=data.wind_state,
-			imu_calibration_state=data.imu_calibration_state,
-			battery_percentage=data.battery_percentage,
-			drone_fly_time_left_sec=data.drone_fly_time_left/10.,
-			drone_battery_left_sec=data.drone_battery_left/10.,
-			is_flying=data.em_sky,
-			is_on_ground=data.em_ground,
-			is_em_open=data.em_open,
-			is_drone_hover=data.drone_hover,
-			is_outage_recording=data.outage_recording,
-			is_battery_low=data.battery_low,
-			is_battery_lower=data.battery_lower,
-			is_factory_mode=data.factory_mode,
-			fly_mode=data.fly_mode,
-			throw_takeoff_timer_sec=data.throw_fly_timer/10.,
-			camera_state=data.camera_state,
-			electrical_machinery_state=data.electrical_machinery_state,
-			front_in=data.front_in,
-			front_out=data.front_out,
-			front_lsc=data.front_lsc,
-			temperature_height_m=data.temperature_height/10.,
-			cmd_roll_ratio=float(self.drone.wifi_strength),
-			cmd_pitch_ratio=None,
-			cmd_yaw_ratio=None,
-			cmd_vspeed_ratio=None,
-			cmd_fast_mode=None,
-		)
-		self.pub_status.publish(msg)
-
-	def cb_data_log(self, event, sender, data, **args):
-		time_cb = rospy.Time.now()
-
-		odom_msg = Odometry()
-		odom_msg.child_frame_id = rospy.get_namespace() + 'base_link'
-		odom_msg.header.stamp = time_cb
-		odom_msg.header.frame_id = rospy.get_namespace() + 'local_origin'        
-
-		# Height from MVO received as negative distance to floor
-		odom_msg.pose.pose.position.z = -data.mvo.pos_z #self.height #-data.mvo.pos_z
-		odom_msg.pose.pose.position.x = data.mvo.pos_x
-		odom_msg.pose.pose.position.y = data.mvo.pos_y
-		odom_msg.pose.pose.orientation.w = data.imu.q0
-		odom_msg.pose.pose.orientation.x = data.imu.q1
-		odom_msg.pose.pose.orientation.y = data.imu.q2
-		odom_msg.pose.pose.orientation.z = data.imu.q3
-		# Linear speeds from MVO received in dm/sec
-		odom_msg.twist.twist.linear.x = data.mvo.vel_y/10
-		odom_msg.twist.twist.linear.y = data.mvo.vel_x/10
-		odom_msg.twist.twist.linear.z = -data.mvo.vel_z/10
-		odom_msg.twist.twist.angular.x = data.imu.gyro_x
-		odom_msg.twist.twist.angular.y = data.imu.gyro_y
-		odom_msg.twist.twist.angular.z = data.imu.gyro_z
-				
-		self.pub_odom.publish(odom_msg)
-		
-		imu_msg = Imu()
-		imu_msg.header.stamp = time_cb
-		imu_msg.header.frame_id = rospy.get_namespace() + 'base_link'
-		
-		imu_msg.orientation.w = data.imu.q0
-		imu_msg.orientation.x = data.imu.q1
-		imu_msg.orientation.y = data.imu.q2
-		imu_msg.orientation.z = data.imu.q3        
-		imu_msg.angular_velocity.x = data.imu.gyro_x
-		imu_msg.angular_velocity.y = data.imu.gyro_y
-		imu_msg.angular_velocity.z = data.imu.gyro_z
-		imu_msg.linear_acceleration.x = data.imu.acc_x
-		imu_msg.linear_acceleration.y = data.imu.acc_y
-		imu_msg.linear_acceleration.z = data.imu.acc_z
-		
-		self.pub_imu.publish(imu_msg)
+	
 
 	def manual(self, msg):
 		self.key_value = msg.data
@@ -649,12 +530,103 @@ class engine():
 				self.activ_throt = True
 
 
+#########################################################   DRONE SUBSCRIBERS   ######################################################
 
 
+	def cb_status_log(self, event, sender, data, **args):
+		speed_horizontal_mps = math.sqrt(
+			data.north_speed*data.north_speed+data.east_speed*data.east_speed)/10.
 
-########################   MAIN   #########################
+		# TODO: verify outdoors: anecdotally, observed that:
+		# data.east_speed points to South
+		# data.north_speed points to East
+		msg = TelloStatus(
+			height_m=data.height/10.,
+			speed_northing_mps=-data.east_speed/10.,
+			speed_easting_mps=data.north_speed/10.,
+			speed_horizontal_mps=speed_horizontal_mps,
+			speed_vertical_mps=-data.ground_speed/10.,
+			flight_time_sec=data.fly_time/10.,
+			imu_state=data.imu_state,
+			pressure_state=data.pressure_state,
+			down_visual_state=data.down_visual_state,
+			power_state=data.power_state,
+			battery_state=data.battery_state,
+			gravity_state=data.gravity_state,
+			wind_state=data.wind_state,
+			imu_calibration_state=data.imu_calibration_state,
+			battery_percentage=data.battery_percentage,
+			drone_fly_time_left_sec=data.drone_fly_time_left/10.,
+			drone_battery_left_sec=data.drone_battery_left/10.,
+			is_flying=data.em_sky,
+			is_on_ground=data.em_ground,
+			is_em_open=data.em_open,
+			is_drone_hover=data.drone_hover,
+			is_outage_recording=data.outage_recording,
+			is_battery_low=data.battery_low,
+			is_battery_lower=data.battery_lower,
+			is_factory_mode=data.factory_mode,
+			fly_mode=data.fly_mode,
+			throw_takeoff_timer_sec=data.throw_fly_timer/10.,
+			camera_state=data.camera_state,
+			electrical_machinery_state=data.electrical_machinery_state,
+			front_in=data.front_in,
+			front_out=data.front_out,
+			front_lsc=data.front_lsc,
+			temperature_height_m=data.temperature_height/10.,
+			cmd_roll_ratio=float(self.drone.wifi_strength),
+			cmd_pitch_ratio=None,
+			cmd_yaw_ratio=None,
+			cmd_vspeed_ratio=None,
+			cmd_fast_mode=None,
+		)
+		self.pub_status.publish(msg)
+
+	def cb_data_log(self, event, sender, data, **args):
+		time_cb = rospy.Time.now()
+
+		odom_msg = Odometry()
+		odom_msg.child_frame_id = rospy.get_namespace() + 'base_link'
+		odom_msg.header.stamp = time_cb
+		odom_msg.header.frame_id = rospy.get_namespace() + 'local_origin'        
+
+		# Height from MVO received as negative distance to floor
+		odom_msg.pose.pose.position.z = -data.mvo.pos_z #self.height #-data.mvo.pos_z
+		odom_msg.pose.pose.position.x = data.mvo.pos_x
+		odom_msg.pose.pose.position.y = data.mvo.pos_y
+		odom_msg.pose.pose.orientation.w = data.imu.q0
+		odom_msg.pose.pose.orientation.x = data.imu.q1
+		odom_msg.pose.pose.orientation.y = data.imu.q2
+		odom_msg.pose.pose.orientation.z = data.imu.q3
+		# Linear speeds from MVO received in dm/sec
+		odom_msg.twist.twist.linear.x = data.mvo.vel_y/10
+		odom_msg.twist.twist.linear.y = data.mvo.vel_x/10
+		odom_msg.twist.twist.linear.z = -data.mvo.vel_z/10
+		odom_msg.twist.twist.angular.x = data.imu.gyro_x
+		odom_msg.twist.twist.angular.y = data.imu.gyro_y
+		odom_msg.twist.twist.angular.z = data.imu.gyro_z
+				
+		self.pub_odom.publish(odom_msg)
+		
+		imu_msg = Imu()
+		imu_msg.header.stamp = time_cb
+		imu_msg.header.frame_id = rospy.get_namespace() + 'base_link'
+		
+		imu_msg.orientation.w = data.imu.q0
+		imu_msg.orientation.x = data.imu.q1
+		imu_msg.orientation.y = data.imu.q2
+		imu_msg.orientation.z = data.imu.q3        
+		imu_msg.angular_velocity.x = data.imu.gyro_x
+		imu_msg.angular_velocity.y = data.imu.gyro_y
+		imu_msg.angular_velocity.z = data.imu.gyro_z
+		imu_msg.linear_acceleration.x = data.imu.acc_x
+		imu_msg.linear_acceleration.y = data.imu.acc_y
+		imu_msg.linear_acceleration.z = data.imu.acc_z
+		
+		self.pub_imu.publish(imu_msg)
 
 
+########################################################   MAIN   ######################################################################
 
 
 '''

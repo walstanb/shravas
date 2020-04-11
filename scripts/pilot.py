@@ -45,8 +45,8 @@ class pilot():
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
 
-		self.cruize = 15.0
-		self.delivery_z = 18.0
+		self.cruize = 13.0
+		self.delivery_z = 19.0
 
 		self.counter = 0
 		self.takeoffland = -100
@@ -57,7 +57,7 @@ class pilot():
 		self.home_y = 0.0
 		self.startend = 2
 
-		self.coordinatespub=[0.0,0.0,30.0]
+		self.coordinatespub=[0.0,0.0,0.0]
 		self.create_pose_array()
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
 		self.coordinates1=nofly.main(self.coordinates)
@@ -99,10 +99,9 @@ class pilot():
 	'''
 
 	def gotoloc(self,wp_x,wp_y,wp_z,deltaxy,deltaz):
-		self.gui_status.publish("Travelling to new location")
+		self.gui_status.publish("Travelling to location : "+str(wp_x)+", "+str(wp_y)+", "+str(wp_z))
 		self.coordinatespub=[wp_x,wp_y,wp_z]
 		self.create_pose_array()
-		self.gui_status.publish(str(wp_x)+","+str(wp_y)+","+str(wp_z))
 		self.check_delta(wp_x,wp_y,wp_z,deltaxy,deltaz)
 	
 	'''
@@ -143,6 +142,7 @@ class pilot():
 	def land(self,endrun,index):
 		if(endrun == 1 or self.startend != 1):
 			self.takeoffland = -1
+			self.gui_status.publish("Landing now")
 		else:
 			self.takeoffland = 0
 			self.coordinatespub.pop()
@@ -152,9 +152,8 @@ class pilot():
 			self.gui_status.publish("Waiting for authentication")			
 			self.check_qr(index)
 			if(self.startend == 1):
-				rospy.sleep(3)
+				rospy.sleep(3)	
 			self.takeoffland=1
-			self.gui_status.publish("Taking off for next destination ")
 				
 	'''
 	Function Name: 	fly
@@ -185,7 +184,7 @@ class pilot():
 				self.land(0,index)
 				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
 			
-			elif(self.coordinates[index]['delivery']== -2):
+			elif(self.coordinates[index]['delivery'] == -2):
 				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
 			
 			elif(self.coordinates[index]['delivery'] == -1):
@@ -236,13 +235,15 @@ class pilot():
 	Example Call:  set_guicommand(msg)
 	'''
 
-	def set_guicommand(self,msg): 
-		self.startend=msg.data 	# 1 for start , 0 for land ,-1 for call back
+	def set_guicommand(self,msg):
+		#print(msg.data) 
+		self.startend = msg.data 	# 1 for start , 0 for land ,-1 for call back
 		if(self.startend == 0):
-			rospy.sleep(1)
 			self.takeoffland=-1
+			self.gui_status.publish("Emergency !!! Landing now")
 			self.takeoff.publish(self.takeoffland)
 		elif(self.startend == -1):
+			self.gui_status.publish("Emergency !!! Called Back")
 			rospy.sleep(1)
 			self.takeoffland=1
 			self.coordinatespub = [self.home_x,self.home_y,self.cruize]
