@@ -46,9 +46,10 @@ class engine():
 
 	def __init__(self):
 		
-		self.flag=1
+		self.flag = 1
 		self.autopilot  = False
 		self.activate_takeoff = 1
+		self.takeoff = 1
 
 		self.drone = tellopy.Tello()
 		self.drone.connect()
@@ -342,17 +343,24 @@ class engine():
 	'''
 
 	def takeoffland(self,ddata):
-		if(ddata.data == -1):
-			self.autopilot=False				
+
+		if(ddata.data == -1 and (self.activate_takeoff == 0 or self.activate_takeoff == 1)):
+			print("Land")
+			self.autopilot = False				
 			self.drone.land()
-		if(ddata.data == 1 and self.activate_takeoff == 1): # Change everytime takeoff - krut
-			self.flag=1
-			self.drone.takeoff()
-			self.activate_takeoff=0
+			self.activate_takeoff = -1
+
+		if(ddata.data == 1 and self.activate_takeoff == 1):
+			if(self.takeoff == 1):
+				self.drone.takeoff()
+				self.takeoff = 0
+			self.activate_takeoff = 0
 			self.autopilot = True
-		elif((ddata.data == 0 or ddata.data == -1) and self.activate_takeoff == 0):	
-			self.activate_takeoff=1
-			self.flag=0
+			self.flag = 1
+				
+		elif(ddata.data == 0 and self.activate_takeoff == 0):	
+			self.activate_takeoff = 1
+			self.flag = 0
 			
 
 	def feed(self):
@@ -360,18 +368,18 @@ class engine():
 		flag = 0
 		for packet in self.container.demux((self.vid_stream,)):
 			for frame in packet.decode():
-				if(flag==0):
+				if(flag == 0):
 					t0 = threading.Thread(target=self.feed_exec, args=[frame])
 					t0.start()
-					flag=1
-				elif(flag==1):
+					flag = 1
+				elif(flag == 1):
 					t1 = threading.Thread(target=self.feed_exec, args=[frame])
 					t1.start()
-					flag=2
+					flag = 2
 				else:
 					t1.join()
 					t0.join()
-					flag=0
+					flag = 0
 			
 	def feed_exec(self,frame):
 		image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
