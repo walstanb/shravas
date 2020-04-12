@@ -1,39 +1,26 @@
 #!/usr/bin/env python
 
-'''
-Team id:       
-Author List:   Aditya Narayan Bhattacharya,Ninad Choksi, Krut Chitre, Walstan Baptista
-Filename:      engine.py
-Theme:         Quaddrop - Automated Aerial Delivery System
-Functions:		Base engine for drone control
-Global variables:
-'''
-
 from std_msgs.msg import Int16
 from std_msgs.msg import Int32
-from std_msgs.msg import Float64
-import rospy
-import time
-import array as arr
+from std_msgs.msg import String
 from geometry_msgs.msg import PoseArray
-import numpy
-import av
-import cv2,cv_bridge
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point
+import rospy
+import tellopy
 import time
 import datetime
 import os
-import tellopy
-from pyzbar import pyzbar
-import imutils
-import time
-from std_msgs.msg import String
 import csvio
 import getpass
-from geometry_msgs.msg import Pose
-from geometry_msgs.msg import Point
 import nofly
 
 class pilot():
+
+	def create_pose_array(self):
+		self.posepos.position = Point(*self.coordinatespub)
+		self.msgpub.poses=[]
+		self.msgpub.poses.append(self.posepos)
 		
 	'''
 	Function Name: __init__
@@ -46,52 +33,43 @@ class pilot():
 	def __init__(self):
 		self.homelocation=1        
 		rospy.init_node('drone_pilot')
-		
-		self.wppub = rospy.Publisher('/wp_cords', PoseArray, queue_size=60)
 		self.msgpub = PoseArray()
+		self.posepos = Pose()
+
+		self.wppub = rospy.Publisher('/wp_cords', PoseArray, queue_size=60)
 		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1, latch=True)
 		self.progress = rospy.Publisher('/progbar', Int16, queue_size=1)
+		
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
 
+		self.cruize = 8.0
+		self.delivery_z = 8.0
+
 		self.counter = 0
-		self.takeoffland = -1
-		self.cruize = 18.0
+		self.takeoffland = -100
 		self.drone_x = 0.0
 		self.drone_y = 0.0
 		self.drone_z = 24.0
 		self.home_x = 0.0
 		self.home_y = 0.0
-		self.wp_x = 0.0
-		self.wp_y = 0.0
-		self.wp_z = 0.0
-		
-		#self.authenticationflag = 0 # Do not remove to be uncommented when feature of invalid QR is to be used
+		self.startend = 2
 
-		self.coordinatespub=[0.0,0.0,30.0]
-		pose=Pose()
-		pose.position = Point(*self.coordinatespub)
-		self.msgpub.poses.append(pose)
-
-		self.startrun = 0
-		self.startend = 1
+		self.coordinatespub=[0.0,0.0,0.0]
+		self.create_pose_array()
 		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
 		self.coordinates1=nofly.main(self.coordinates)
-		#csvio.csvwrite(self.coordinates1,'/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coords.csv')
-		#print(self.coordinates)
-		#print(self.coordinates1)
+		print(self.coordinates)
+		print(self.coordinates1)
 		for index in range(len(self.coordinates)):
 			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])
 			self.coordinates[index]['y'] = float(self.coordinates[index]['y'])
 			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
 			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
 		
-		#self.coordinates=[{"x":0,"y":0,"Z":0,"qr":0,"delivery":0},{"x":-8.0,"y":4.0,"Z":20,"qr":"QuadDrop","delivery":2},{"x":0.7,"y":-0.63,"Z":20,"qr":"WANK","delivery":1},{"x":0,"y":0,"Z":0,"qr":0,"delivery":-1}]
-		self.qr_pub="no code"
-		self.start_time = 0.0
-		self.end_time = 0.0
+		self.qr_pub=None
 
 	'''
 	Function Name: check_delta
@@ -101,13 +79,17 @@ class pilot():
 	Example Call:  check_delta(0.2,0.5)
 	'''
 	
-	def check_delta(self,err_xy,err_z):
-		#Checks wether the drone is at its destination
-		if((self.drone_x<(self.wp_x+err_xy)) & (self.drone_x>(self.wp_x-err_xy)) & (self.drone_y<(self.wp_y+err_xy)) & (self.drone_y>(self.wp_y-err_xy)) & (self.drone_z>(self.wp_z-err_z)) & (self.drone_z<(self.wp_z+err_z))):			
-			self.counter+=1
-		else:
-			self.counter=0
-		
+	def check_delta(self,wp_x,wp_y,wp_z,err_xy,err_z):
+		self.counter=0
+		while(self.counter < 100):
+			if((self.drone_x<(wp_x+err_xy)) & (self.drone_x>(wp_x-err_xy)) & (self.drone_y<(wp_y+err_xy)) & (self.drone_y>(wp_y-err_xy)) & (self.drone_z>(wp_z-err_z)) & (self.drone_z<(wp_z+err_z))):			
+				self.counter+=1
+			else:
+				self.counter=0
+			if(self.startend!=1):
+				self.counter=200
+		self.progress.publish(0)
+
 	'''
 	Function Name:	gotoloc
 	Input:			travelling coordinates(x,y,z) and delta value to check at destination coordinates
@@ -116,22 +98,38 @@ class pilot():
 	Example Call:	gotoloc(0.0,0.0,18.0,0.5,0.5)
 	'''
 
-	def gotoloc(self,x1,y1,z1,deltaxy,deltaz):
-		self.gui_status.publish("Travelling to new location")
-		self.wp_x=x1
-		self.wp_y=y1
-		self.wp_z=z1
-		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
-		pose=Pose()
-		pose.position = Point(*self.coordinatespub)
-		self.msgpub.poses=[]
-		self.msgpub.poses.append(pose)
-		self.gui_status.publish(str(self.wp_x)+","+str(self.wp_y)+","+str(self.wp_z))
-		self.counter=0
-		while(self.counter < 100):
-			self.check_delta(deltaxy,deltaz)
-		self.progress.publish(0)
-
+	def gotoloc(self,wp_x,wp_y,wp_z,deltaxy,deltaz):
+		self.gui_status.publish("Travelling to location : "+str(wp_x)+", "+str(wp_y)+", "+str(wp_z))
+		self.coordinatespub=[wp_x,wp_y,wp_z]
+		self.create_pose_array()
+		self.check_delta(wp_x,wp_y,wp_z,deltaxy,deltaz)
+	
+	'''
+	Function name : check_qr
+	Logic	      : To check and match the qr code shown by customer
+	'''
+	
+	def check_qr(self,index):
+		moveahead = -1
+		self.qr_pub = None
+		start_time = time.time()
+		while(moveahead!=1):
+			end_time = time.time()
+			if((end_time - start_time) < 12):
+				if(self.startend != 1):
+					moveahead=1
+					self.gui_status.publish("Emergency ! Going back home")
+				elif(self.qr_pub == self.coordinates[index]['qr']):	
+					moveahead = 1
+					self.gui_status.publish("Customer Authenticated")
+				elif(moveahead == -1 and self.qr_pub is not None):						
+					moveahead = 0
+					self.gui_status.publish("Invalid QR code")
+					start_time = time.time()
+			else:
+				moveahead=1
+				self.gui_status.publish("No Customer found, taking package back to home")
+			
 
 	'''
 	Function Name:	land
@@ -142,88 +140,66 @@ class pilot():
 	'''		
 
 	def land(self,endrun,index):
-		self.moveahead=0
-		if(endrun == 0):
-			self.takeoffland=0
+		if(endrun == 1 or self.startend != 1):
+			self.takeoffland = -1
+			self.gui_status.publish("Landing now")
 		else:
-			self.takeoffland=-1
-		self.wp_z=18.0
-		self.coordinatespub=[self.wp_x,self.wp_y,self.wp_z]
-		pose=Pose()
-		self.msgpub.poses=[]
-		pose.position = Point(*self.coordinatespub)
-		self.msgpub.poses.append(pose)
-		self.counter=0
-		while(self.counter < 100):
-			self.check_delta(0.5,1.5)
-		self.progress.publish(0)	
-		self.takeoff.publish(self.takeoffland)
-		if(endrun==0):
-			self.start_time = time.time()
-			self.gui_status.publish("Waiting for authentication")
-			while(self.moveahead!=1):
-				self.end_time = time.time()
-				#print(self.end_time - self.start_time)
-				if((self.end_time - self.start_time) < 2):
-					if(self.qr_pub == self.coordinates[index]['qr']):
-						#self.authenticationflag = 1	# Do not remove to be uncommented when feature of invalid QR is to be used
-						self.moveahead=1
-						self.gui_status.publish("Customer Authenticated")
-					#else:						# Do not remove to be uncommented when feature of invalid QR is to be used
-					#	self.authenticationflag = 0
-				else:
-					self.moveahead=1
-					self.gui_status.publish("No Customer found, taking package back to home")
-			#rospy.sleep(3)
+			self.takeoffland = 0
+			self.coordinatespub.pop()
+			self.coordinatespub.append(self.delivery_z)
+			self.create_pose_array()
+			self.check_delta(self.coordinatespub[0],self.coordinatespub[1],self.coordinatespub[2],0.5,1.5)	
+			self.gui_status.publish("Waiting for authentication")			
+			self.check_qr(index)
+			if(self.startend == 1):
+				rospy.sleep(3)	
 			self.takeoffland=1
-			self.takeoff.publish(self.takeoffland)
-			self.gui_status.publish("Taking off for next destination ")
-			self.gotoloc(self.wp_x,self.wp_y,self.wp_z,1.0,2.0)	
-
-	
-
+				
 	'''
 	Function Name: 	fly
 	Input:			Nil
 	Output:			Next Delivery location
 	Logic:			For delivery=1 Go for delivery and set the coordinates and for delivery=0 travel for no fly zone avoidance
 	Example call:	fly()
+
 	'''
 	def fly(self):
-		
-		while(self.startend != 1):
-			rospy.sleep(0.0001)
+		#while(self.startend != 1):
+		#	rospy.sleep(0.0001)
+		rospy.sleep(3)
+		self.home_x = self.drone_x
+		self.home_y = self.drone_y
+
 		for index in range(len(self.coordinates)):
-			self.callbackset = index
-			if(self.coordinates[self.callbackset]['delivery'] == 0):
+			
+			if(self.startend == -1):
+				break
+			elif(self.coordinates[index]['delivery'] == 0):
 				self.gui_status.publish("Takeoff")
 				self.takeoffland=1
-				self.takeoff.publish(self.takeoffland)
-				rospy.sleep(1)
+				rospy.sleep(3)
 				self.gotoloc(self.home_x,self.home_y,self.cruize,1.5,3.0)
-			elif(self.coordinates[self.callbackset]['delivery'] > 0):
-				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
-				self.land(0,self.callbackset)
-			elif(self.coordinates[self.callbackset]['delivery']== -2):
-				self.gotoloc(self.coordinates[self.callbackset]['x'],self.coordinates[self.callbackset]['y'],self.cruize,0.3,3.0)
-			elif(self.coordinates[self.callbackset]['delivery'] == -1):
+			
+			elif(self.coordinates[index]['delivery'] > 0):
+				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
+				self.land(0,index)
+				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
+			
+			elif(self.coordinates[index]['delivery'] == -2):
+				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
+			
+			elif(self.coordinates[index]['delivery'] == -1):
 				self.gui_status.publish("ALL DELIVERIES COMPLETED GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
-				self.land(1,self.callbackset) 
+				self.land(1,index) 
+			
 			else:
 				self.gui_status.publish("BAD COORDINATES GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
-				self.land(1,self.callbackset) 
-
-
-
+				self.land(1,index) 
 
 
 ########################   SUBSCRIBER FUNCTIONS    ########################	
-
-
-
-
 
 
 	'''
@@ -235,19 +211,11 @@ class pilot():
 	'''
 
 	def get_pose(self, pose):
-		if(self.homelocation==1):
-			self.home_x = pose.poses[0].position.x
-			self.home_y = pose.poses[0].position.y
-			self.homelocation=0
-
-		
 		self.drone_x = pose.poses[0].position.x
 		self.drone_y = pose.poses[0].position.y
 		self.drone_z = pose.poses[0].position.z
 		self.takeoff.publish(self.takeoffland)
 		self.wppub.publish(self.msgpub)
-		if(self.startend == -1):
-			self.callbackset = 0
 
 	'''
 	Function Name: setqr
@@ -268,43 +236,24 @@ class pilot():
 	Example Call:  set_guicommand(msg)
 	'''
 
-	def set_guicommand(self,msg): 
-		self.startend=msg.data 	# 1 for start , 0 for land ,-1 for call back
+	def set_guicommand(self,msg):
+		#print(msg.data) 
+		self.startend = msg.data 	# 1 for start , 0 for land ,-1 for call back
 		if(self.startend == 0):
 			self.takeoffland=-1
+			self.gui_status.publish("Emergency !!! Landing now")
 			self.takeoff.publish(self.takeoffland)
-			self.startend=2
 		elif(self.startend == -1):
-			self.callbackset = 0
-			if(self.takeoffland == 0):
-				self.takeoffland = 1
-				self.takeoff.publish(self.takeoffland)
-			temp={}
-			temp['x'] = self.home_x
-			temp['y'] = self.home_y
-			temp['z'] = self.cruize
-			temp['delivery'] = -2
-			temp['id'] = 0
-			self.coordinates=[]
-			self.coordinates.append(temp)
-			self.coordinatespub = [self.home_x,self.home_y,self.cruize]
-			pose=Pose()
-			self.msgpub.poses=[]
-			pose.position = Point(*self.coordinatespub)
-			self.msgpub.poses.append(pose)
-			self.counter = 0
-			while(self.counter < 100):
-				self.check_delta(0.5,1.5)
-			self.progress.publish(0)
+			self.gui_status.publish("Emergency !!! Called Back")
+			rospy.sleep(1)
 			self.takeoffland=1
-			self.takeoff.publish(self.takeoffland)
+			self.coordinatespub = [self.home_x,self.home_y,self.cruize]
+			self.create_pose_array()
+			self.check_delta(self.home_x,self.home_y,self.cruize,0.5,1.5)
 			self.takeoffland=-1
-			self.takeoff.publish(self.takeoffland)
 
 
 ########################   MAIN   #########################
-
-
 
 
 '''
@@ -317,3 +266,4 @@ Example Call:	called automatically
 if __name__ == '__main__':
 	test = pilot()
 	test.fly()
+	time.sleep(20)	

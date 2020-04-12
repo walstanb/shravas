@@ -59,16 +59,10 @@ class pilot():
 
 		self.coordinatespub=[0.0,0.0,0.0]
 		self.create_pose_array()
-		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
-		self.coordinates1=nofly.main(self.coordinates)
-		print(self.coordinates)
-		print(self.coordinates1)
-		for index in range(len(self.coordinates)):
-			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])
-			self.coordinates[index]['y'] = float(self.coordinates[index]['y'])
-			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
-			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
-		
+		self.coordinates1=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
+		self.coordinates=nofly.main(self.coordinates1)
+		#print(self.coordinates1)
+		#print(self.coordinates)
 		self.qr_pub=None
 
 	'''

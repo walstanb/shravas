@@ -305,7 +305,7 @@ class Gui():
 				fc+=3
 			elif ls[i]['delivery'] < 0:
 				fc+=1
-		self.fac=1000/7
+		self.fac=1000/8
 		t1 = threading.Thread(target=self.increase_progbar)
 		t1.start()
 
