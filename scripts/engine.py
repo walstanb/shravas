@@ -357,7 +357,7 @@ class engine():
 			self.activate_takeoff = 0
 			self.autopilot = True
 			self.flag = 1
-				
+					
 		elif(ddata.data == 0 and self.activate_takeoff == 0):	
 			self.activate_takeoff = 1
 			self.flag = 0
@@ -376,9 +376,14 @@ class engine():
 					t1 = threading.Thread(target=self.feed_exec, args=[frame])
 					t1.start()
 					flag = 2
+				elif(flag == 2):
+					t2 = threading.Thread(target=self.feed_exec, args=[frame])
+					t2.start()
+					flag = 3
 				else:
-					t1.join()
 					t0.join()
+					t1.join()
+					t2.join()
 					flag = 0
 			
 	def feed_exec(self,frame):

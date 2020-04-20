@@ -56,8 +56,8 @@ class pilot():
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
 
-		self.cruize = 13.0
-		self.delivery_z = 21.0
+		self.cruize = 14.5
+		self.delivery_z = 20.5
 
 		self.counter = 0
 		self.takeoffland = -100
@@ -215,6 +215,7 @@ class pilot():
 				self.gui_status.publish("BAD COORDINATES GOING BACK HOME")
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
 				self.land(1,index) 
+		time.sleep(40)
 
 
 ###########################################################   SUBSCRIBER FUNCTIONS    ###################################################	

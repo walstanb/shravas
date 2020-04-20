@@ -25,5 +25,3 @@ def auth(uname,password):
 			return -1
 
 
-
-#auth('Walstan','password')

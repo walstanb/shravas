@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from std_msgs.msg import Int16
 from std_msgs.msg import Int32
 from std_msgs.msg import String
@@ -17,17 +16,29 @@ import nofly
 
 class pilot():
 
+	'''
+	
+	Function Name : create_pose_array
+	Input		  : None
+	Output		  : Creates a pose array of next visiting coordinates
+	Logic		  : Uses Point library and structure of pose array to create pose array
+	Example Call  : self.create_pose_array() 
+	
+	'''
+
 	def create_pose_array(self):
 		self.posepos.position = Point(*self.coordinatespub)
 		self.msgpub.poses=[]
 		self.msgpub.poses.append(self.posepos)
 		
 	'''
-	Function Name: __init__
-	Input:         None
-	Output:        Initiates all the variables in the class ImgProc and creates subscribers 
-	Logic:         initializes the value of the variables to predefined values
-	Example Call:  It is called automatically when an object is created
+	
+	Function Name : __init__
+	Input		  : None
+	Output		  : Initiates all the variables in the class ImgProc and creates subscribers 
+	Logic		  : initializes the value of the variables to predefined values
+	Example Call  : It is called automatically when an object is created
+	
 	'''
 
 	def __init__(self):
@@ -45,8 +56,8 @@ class pilot():
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
 
-		self.cruize = 8.0
-		self.delivery_z = 8.0
+		self.cruize = 13.0
+		self.delivery_z = 21.0
 
 		self.counter = 0
 		self.takeoffland = -100
@@ -59,24 +70,20 @@ class pilot():
 
 		self.coordinatespub=[0.0,0.0,0.0]
 		self.create_pose_array()
-		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
-		self.coordinates1=nofly.main(self.coordinates)
+		self.coordinates1=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
+		self.coordinates=nofly.main(self.coordinates1)
+		#print(self.coordinates1)
 		print(self.coordinates)
-		print(self.coordinates1)
-		for index in range(len(self.coordinates)):
-			self.coordinates[index]['x'] = float(self.coordinates[index]['x'])
-			self.coordinates[index]['y'] = float(self.coordinates[index]['y'])
-			self.coordinates[index]['z'] = float(self.coordinates[index]['z'])
-			self.coordinates[index]['delivery'] = int(self.coordinates[index]['delivery'])
-		
 		self.qr_pub=None
 
 	'''
-	Function Name: check_delta
-	Input:         Error allowed
-	Output:        none
-	Logic:         checks if drone is at specified position
-	Example Call:  check_delta(0.2,0.5)
+	
+	Function Name : check_delta
+	Input		  : Error allowed
+	Output		  : none
+	Logic		  : checks if drone is at specified position
+	Example call  :  self.check_delta(0.2,0.5)
+	
 	'''
 	
 	def check_delta(self,wp_x,wp_y,wp_z,err_xy,err_z):
@@ -91,11 +98,13 @@ class pilot():
 		self.progress.publish(0)
 
 	'''
-	Function Name:	gotoloc
-	Input:			travelling coordinates(x,y,z) and delta value to check at destination coordinates
-	Output:			None
-	Logic:			Assign the values to coordinates and publish them
-	Example Call:	gotoloc(0.0,0.0,18.0,0.5,0.5)
+	
+	Function Name :	gotoloc
+	Input		  :	travelling coordinates(x,y,z) and delta value to check at destination coordinates
+	Output		  :	None
+	Logic		  :	Assign the values to coordinates and publish them
+	Example Call  : self.gotoloc(0.0,0.0,18.0,0.5,0.5)
+	
 	'''
 
 	def gotoloc(self,wp_x,wp_y,wp_z,deltaxy,deltaz):
@@ -105,8 +114,13 @@ class pilot():
 		self.check_delta(wp_x,wp_y,wp_z,deltaxy,deltaz)
 	
 	'''
+	
 	Function name : check_qr
+	Input		  : Qr code data from database
+	Output		  : Signal to move to next destination
 	Logic	      : To check and match the qr code shown by customer
+	Example Call  : self.check_qr(3)
+	
 	'''
 	
 	def check_qr(self,index):
@@ -132,23 +146,26 @@ class pilot():
 			
 
 	'''
-	Function Name:	land
-	Input:			None
-	Output:			None
-	Logic:			Check for delta at cruize height over home location and land when delta satisfied
-	Example call:	land(0,index)
+	
+	Function Name :	land
+	Input		  :	Signal (endrun) for  delivery land or home land
+	Output		  :	None
+	Logic		  :	Check for delta at cruize height over home location and land when delta satisfied
+	Example call  : self.land(0,index)
+	
 	'''		
 
 	def land(self,endrun,index):
+		self.gui_status.publish("Descending for delivery")
+		self.coordinatespub.pop()
+		self.coordinatespub.append(self.delivery_z)
+		self.create_pose_array()
+		self.check_delta(self.coordinatespub[0],self.coordinatespub[1],self.coordinatespub[2],0.5,1.5)
 		if(endrun == 1 or self.startend != 1):
 			self.takeoffland = -1
 			self.gui_status.publish("Landing now")
 		else:
-			self.takeoffland = 0
-			self.coordinatespub.pop()
-			self.coordinatespub.append(self.delivery_z)
-			self.create_pose_array()
-			self.check_delta(self.coordinatespub[0],self.coordinatespub[1],self.coordinatespub[2],0.5,1.5)	
+			self.takeoffland = 0	
 			self.gui_status.publish("Waiting for authentication")			
 			self.check_qr(index)
 			if(self.startend == 1):
@@ -156,17 +173,18 @@ class pilot():
 			self.takeoffland=1
 				
 	'''
-	Function Name: 	fly
-	Input:			Nil
-	Output:			Next Delivery location
-	Logic:			For delivery=1 Go for delivery and set the coordinates and for delivery=0 travel for no fly zone avoidance
-	Example call:	fly()
-
+	
+	Function Name : fly
+	Input		  :	Nil
+	Output		  :	Next Delivery location
+	Logic		  :	For delivery=1 Go for delivery and set the coordinates and for delivery=0 travel for no fly zone avoidance
+	Example call  : fly()
+	
 	'''
+
 	def fly(self):
 		#while(self.startend != 1):
 		#	rospy.sleep(0.0001)
-		rospy.sleep(3)
 		self.home_x = self.drone_x
 		self.home_y = self.drone_y
 
@@ -199,15 +217,17 @@ class pilot():
 				self.land(1,index) 
 
 
-########################   SUBSCRIBER FUNCTIONS    ########################	
+###########################################################   SUBSCRIBER FUNCTIONS    ###################################################	
 
 
 	'''
-	Function Name: get_pose
-	Input:         takes poseArray message from whycon/poses
-	Output:        sets the value of drone_x, drone_y, drone_z
-	Logic:         subscribes to whycon/poses to get the coordinates of the whycon marker placed on the drone
-	Example Call:  get_pose(data)
+	
+	Function Name : get_pose
+	Input		  : takes poseArray message from whycon/poses
+	Output		  : sets the value of drone_x, drone_y, drone_z
+	Logic		  : subscribes to whycon/poses to get the coordinates of the whycon marker placed on the drone
+	Example Call  : get_pose(data)
+	
 	'''
 
 	def get_pose(self, pose):
@@ -218,22 +238,26 @@ class pilot():
 		self.wppub.publish(self.msgpub)
 
 	'''
-	Function Name: setqr
-	Input:         takes qr data for authentication
-	Output:        sets the value of qr matcher variable
-	Logic:         subscribes to qr to get the qr code date of the user
-	Example Call:  setqr(msg)
+	
+	Function Name : setqr
+	Input		  : takes qr data for authentication
+	Output		  : sets the value of qr matcher variable
+	Logic		  : subscribes to qr to get the qr code date of the user
+	Example Call  : setqr(msg)
+	
 	'''
 
 	def setqr(self, msg):
 		self.qr_pub=msg.data
 
 	'''
-	Function Name: set_guicommand
-	Input:         takes status flag from GUI for start and emergency land
-	Output:        make publisher ready to send command to drone
-	Logic:         sets the flag value
-	Example Call:  set_guicommand(msg)
+	
+	Function Name : set_guicommand
+	Input		  : takes status flag from GUI for start and emergency land
+	Output		  : make publisher ready to send command to drone
+	Logic		  : sets the flag value
+	Example Call  : set_guicommand(msg)
+	
 	'''
 
 	def set_guicommand(self,msg):
@@ -257,12 +281,15 @@ class pilot():
 
 
 '''
-Function Name:	main
-Input:			none
-Output:			none
-Logic:			initializes send_data and calls fly 
-Example Call:	called automatically
+
+Function Name :	main
+Input		  :	none
+Output		  :	none
+Logic		  : initializes send_data and calls fly 
+Example Call  : called automatically
+
 '''	
+
 if __name__ == '__main__':
 	test = pilot()
 	test.fly()

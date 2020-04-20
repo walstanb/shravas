@@ -301,11 +301,12 @@ class Gui():
 		self.progbarvalue=0
 		fc=0
 		for i in range(len(ls)):
-			if ls[i]['delivery'] > 0:
-				fc+=3
-			elif ls[i]['delivery'] < 0:
+			if ls[i]['delivery'] != 0:
 				fc+=1
-		self.fac=1000/8
+			if ls[i]['delivery'] != -2:
+				fc+=2
+				
+		self.fac=1000/fc
 		t1 = threading.Thread(target=self.increase_progbar)
 		t1.start()
 
