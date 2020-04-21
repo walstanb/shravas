@@ -89,11 +89,11 @@ def create_nos(event=None):
 
 		for i in range(0, hei, w.zmm):			# Y Nos
 			w.YNos.create_line([(0, i), (wid, i)], tag='nos_line')
-			top.YNos.create_text(10,i-6,font="Consolas 8", text=str((i/50)-20))
+			top.YNos.create_text(10,i-6,font="Consolas 7", text=str((i/(w.zmm*-2.0))+10))
 
 		for i in range(0, wid, w.zmm):				#X Nos
 			w.XNos.create_line([(i, 0), (i, hei)], tag='nos_line')
-			top.XNos.create_text(i-8,10,font="Consolas 8", text=str((i/50)-20))
+			top.XNos.create_text(i-10,10,font="Consolas 7", text=str((i/(w.zmm*2.0))-10))
 
 def dmode():
 	if(w.colorflag == 0):
