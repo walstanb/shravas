@@ -578,13 +578,19 @@ class Toplevel1:
         self.StartButton.configure(command=QuadDrop_support.start)
         self.StartButton.configure(text='''Start''')
 
+        self.NoflyButton = tk.Button(top)
+        self.NoflyButton.place(relx=0.886, rely=0.019, height=28, width=189)
+        self.NoflyButton.configure(activebackground="#f9f9f9")
+        self.NoflyButton.configure(cursor="hand1")
+        self.NoflyButton.configure(command=QuadDrop_support.nofll)
+        self.NoflyButton.configure(text='''Initialize''')
+
         self.ConnectButton = tk.Button(top)
         self.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
         self.ConnectButton.configure(activebackground="#f9f9f9")
+        self.ConnectButton.configure(cursor="hand1")
         self.ConnectButton.configure(command=QuadDrop_support.conn)
         self.ConnectButton.configure(text='''Connect''')
-
-        
 
         self.EmLock = tk.Checkbutton(top)
         self.EmLock.place(relx=0.016, rely=0.955, relheight=0.019
