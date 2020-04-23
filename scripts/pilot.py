@@ -56,9 +56,9 @@ class pilot():
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
 
-		self.cruize = 14.5
-		self.delivery_z = 20.5
-
+		self.cruize = 14.0
+		self.delivery_z = 19.5
+		self.visiting_count=0
 		self.counter = 0
 		self.takeoffland = -100
 		self.drone_x = 0.0
@@ -95,7 +95,9 @@ class pilot():
 				self.counter=0
 			if(self.startend!=1):
 				self.counter=200
-		self.progress.publish(0)
+		self.visiting_count+=1
+		print(self.visiting_count)
+		self.progress.publish(self.visiting_count)
 
 	'''
 	

@@ -280,15 +280,17 @@ def init(top, gui, *args, **kwargs):
 	root = top
 
 class Gui():
-	def increase_progbar(self):
-		while(self.progbarvalue!=1000):
-			prev=10*(self.fac*(self.counter-1))
-			if(self.progbarvalue > 900):
-				self.progbarvalue = 1000
-			nextt=10*(self.progbarvalue)
-			for i in range(prev,nextt):
-				time.sleep(0.001)
-				top.Progressbar.configure(value=((i+1)/100.0))
+	#def increase_progbar(self):
+		#while(self.progbarvalue!=1000):
+			#prev=10*(self.fac*(self.counter-1))
+			#if(self.progbarvalue > 900):
+			#	self.progbarvalue = 1000
+			#nextt=10*(self.progbarvalue)
+			#for i in range(prev,nextt):
+			#	time.sleep(0.001)
+			#	top.Progressbar.configure(value=((i+1)/100.0))
+			#top.Progressbar.configure(value=(self.progbarvalue))
+
 
 	def __init__(self,obj=None):
 		global top
@@ -300,15 +302,16 @@ class Gui():
 		self.nxt=None
 		self.progbarvalue=0
 		fc=0
-		for i in range(len(ls)):
+		for i in range(1,len(ls)):
 			if ls[i]['delivery'] != 0:
 				fc+=1
 			if ls[i]['delivery'] != -2:
 				fc+=2
 				
-		self.fac=1000/fc
-		t1 = threading.Thread(target=self.increase_progbar)
-		t1.start()
+		self.fac=100/fc
+		
+		#t1 = threading.Thread(target=self.increase_progbar)
+		#t1.start()
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
@@ -346,7 +349,7 @@ class Gui():
 		top.StatusMesaages.see("end")
 
 		top.FlightData.configure(state='normal')
-		top.FlightData.insert('end', 'Flight Data\n- - - - - - - - - - - - - - - - - - - - - - - -\n')
+		top.FlightData.insert('end', 'Drone Flight Data\n- - - - - - - - - - - - - - - - - - - - - - - -\n')
 		top.FlightData.configure(state='disabled')
 
 		top.mvo.configure(state='normal')
@@ -366,8 +369,12 @@ class Gui():
 		top.WhyconCoords.configure(state='disabled')
 	
 	def upd_prog_bar(self,data):
-		self.progbarvalue+=self.fac
-		self.counter+=1
+		self.progbarvalue=(data.data*self.fac)
+		#self.counter+=1
+		if(self.progbarvalue > 90):
+				self.progbarvalue = 100
+		top.Progressbar.configure(value=(self.progbarvalue))
+
 
 	def draw_nxt(self, pose):
 		self.prevx,self.prevy=x,y=scal(pose.poses[0].position.x, pose.poses[0].position.y)
@@ -435,7 +442,7 @@ class Gui():
 
 		top.Battery.configure(value=str(data.battery_percentage))
 		top.Altitude.configure(text=str(100*data.height_m))
-		top.AltitudeBar.configure(value=str(100*data.height_m))
+		top.AltitudeBar.configure(value=str(50*data.height_m))
 		top.Speed.configure(text=str(100*data.speed_horizontal_mps))
 		top.SpeedBar.configure(value=str(100*data.speed_horizontal_mps))
 

@@ -167,7 +167,7 @@ class engine():
 	Input:         value, upper, lower
 	Output:        value in limits
 	Logic:         simple if else logic to determine if value allowed(Use this function to limit the maximum and minimum values you send to your drone)
-	Example Call:  limit(input, max, min)
+	Example Call:  limit(input, max, min) 
 	
 	'''
 
