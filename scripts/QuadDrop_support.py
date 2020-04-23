@@ -167,6 +167,13 @@ def dmode():
 	
 	w.Error.configure(background=col1)
 	w.Error.configure(foreground=col1)
+	
+	w.NoflyButton.configure(background=col1)
+	w.NoflyButton.configure(foreground=col2)
+
+	w.NoflyButton.configure(activebackground=col3)
+	w.NoflyButton.configure(activeforeground=col2)
+	
 	w.ConnectButton.configure(background=col1)
 	w.ConnectButton.configure(foreground=col2)
 
@@ -259,13 +266,17 @@ def conn():
 		w.ConnectButton.place_forget()
 		w.Status.configure(text="Connected",foreground="#2cbc00")
 		w.Error.place_forget()
-		draw_deliv()
 		eng.publish(1)
 	else:
 		w.ConnectButton.place(relx=0.886, rely=0.019, height=28, width=189)
 		w.Status.configure(text="Disconnected",foreground="#ff0000")
 		w.Error.configure(foreground="#ff0000")
 
+def nofll():
+	w.NoflyButton.place_forget()
+	draw_deliv()
+	drobj.publish(9)
+	
 def destroy_window():
 	# Function which closes the window.
 	global top_level
@@ -301,14 +312,7 @@ class Gui():
 		self.delivery_data()
 		self.nxt=None
 		self.progbarvalue=0
-		fc=0
-		for i in range(1,len(ls)):
-			if ls[i]['delivery'] != 0:
-				fc+=1
-			if ls[i]['delivery'] != -2:
-				fc+=2
-				
-		self.fac=100/fc
+		self.fac=0
 		
 		#t1 = threading.Thread(target=self.increase_progbar)
 		#t1.start()
@@ -321,6 +325,7 @@ class Gui():
 		rospy.Subscriber('status_msg', String, self.prnt_msg)
 		rospy.Subscriber('/wp_cords', PoseArray, self.draw_nxt)
 		rospy.Subscriber('/progbar', Int16, self.upd_prog_bar)
+		rospy.Subscriber('/progbar', Int16, self.calc_fac)
 
 		Lphoto = PIL.ImageTk.PhotoImage(PIL.Image.open(pathh+"gui/logoo.png").resize((200, 50), PIL.Image.ANTIALIAS))
 		top.Logo.configure(image = Lphoto)
@@ -367,6 +372,16 @@ class Gui():
 		top.WhyconCoords.configure(state='normal')
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
+	
+	def calc_fac(msg):
+		if (self.fac==0):
+			fc=0
+			for i in range(1,int(msg.data)):
+				if ls[i]['delivery'] != 0:
+					fc+=1
+				if ls[i]['delivery'] != -2:
+					fc+=2
+			self.fac=100/fc
 	
 	def upd_prog_bar(self,data):
 		self.progbarvalue=(data.data*self.fac)
