@@ -232,6 +232,9 @@ def scal(x,y):
 	return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
 
 def draw_deliv():
+	x,y,nr=3.2,4.5,3.0
+	x,y=scal(float(x),float(y))
+	top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#ff0000", width=nr)
 	for i in range(1,len(ls)-1):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
@@ -280,16 +283,16 @@ def init(top, gui, *args, **kwargs):
 	root = top
 
 class Gui():
-	#def increase_progbar(self):
-		#while(self.progbarvalue!=1000):
-			#prev=10*(self.fac*(self.counter-1))
-			#if(self.progbarvalue > 900):
-			#	self.progbarvalue = 1000
-			#nextt=10*(self.progbarvalue)
-			#for i in range(prev,nextt):
-			#	time.sleep(0.001)
-			#	top.Progressbar.configure(value=((i+1)/100.0))
-			#top.Progressbar.configure(value=(self.progbarvalue))
+	def increase_progbar(self):
+		while(self.progbarvalue!=1000):
+			prev=10*(self.fac*(self.counter-1))
+			if(self.progbarvalue > 900):
+				self.progbarvalue = 1000
+			nextt=10*(self.progbarvalue)
+			for i in range(prev,nextt):
+				time.sleep(0.001)
+				top.Progressbar.configure(value=((i+1)/100.0))
+			top.Progressbar.configure(value=(self.progbarvalue))
 
 
 	def __init__(self,obj=None):
@@ -309,9 +312,9 @@ class Gui():
 				fc+=2
 				
 		self.fac=100/fc
-		
-		#t1 = threading.Thread(target=self.increase_progbar)
-		#t1.start()
+
+		t1 = threading.Thread(target=self.increase_progbar)
+		t1.start()
 
 		rospy.Subscriber('whycon/poses', PoseArray, self.draw_point)
 		rospy.Subscriber('drone_feed', Image, self.show_feed)
@@ -370,10 +373,10 @@ class Gui():
 	
 	def upd_prog_bar(self,data):
 		self.progbarvalue=(data.data*self.fac)
-		#self.counter+=1
-		if(self.progbarvalue > 90):
-				self.progbarvalue = 100
-		top.Progressbar.configure(value=(self.progbarvalue))
+		self.counter+=1
+		#if(self.progbarvalue > 90):
+		#		self.progbarvalue = 100
+		#top.Progressbar.configure(value=(self.progbarvalue))
 
 
 	def draw_nxt(self, pose):
