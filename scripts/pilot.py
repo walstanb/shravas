@@ -51,7 +51,8 @@ class pilot():
 		self.gui_status = rospy.Publisher('status_msg', String, queue_size=1, latch=True)
 		self.takeoff = rospy.Publisher('activation', Int32, queue_size=1, latch=True)
 		self.progress = rospy.Publisher('/progbar', Int16, queue_size=1)
-		
+		self.progressbarcount = rospy.Publisher('/progbarcount', Int16, queue_size=1)
+
 		rospy.Subscriber('whycon/poses', PoseArray, self.get_pose)
 		rospy.Subscriber('/qr', String, self.setqr)
 		rospy.Subscriber('drone_init', Int32, self.set_guicommand)
@@ -70,9 +71,7 @@ class pilot():
 
 		self.coordinatespub=[0.0,0.0,0.0]
 		self.create_pose_array()
-		self.coordinates1=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
-		self.coordinates=nofly.main(self.coordinates1)
-		#print(self.coordinates1)
+		self.coordinates=csvio.csvread('/home/'+getpass.getuser()+'/catkin_ws/src/shravas/src/coordinates.csv')
 		print(self.coordinates)
 		self.qr_pub=None
 
@@ -187,8 +186,6 @@ class pilot():
 	def fly(self):
 		while(self.startend != 1):
 			rospy.sleep(0.0001)
-		self.home_x = self.drone_x
-		self.home_y = self.drone_y
 
 		for index in range(len(self.coordinates)):
 			
@@ -206,6 +203,7 @@ class pilot():
 				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
 			
 			elif(self.coordinates[index]['delivery'] == -2):
+				self.gui_status.publish("Avoiding NO FLY ZONE")
 				self.gotoloc(self.coordinates[index]['x'],self.coordinates[index]['y'],self.cruize,0.3,3.0)
 			
 			elif(self.coordinates[index]['delivery'] == -1):
@@ -218,6 +216,32 @@ class pilot():
 				self.gotoloc(self.home_x,self.home_y,self.cruize,0.3,3.0)
 				self.land(1,index) 
 		time.sleep(40)
+
+	'''
+	Function Name 	: check_noflyzone
+	Input			: None
+	Output			: Path with no 'No fly zone 'in between
+	Logic			: Call nofly zone file
+	Example Call 	: self.check_noflyzone()
+
+	'''
+
+	def check_noflyzone(self):
+
+		self.home_x = self.drone_x
+		self.home_y = self.drone_y
+		self.coordinates[0]['x'] = self.home_x
+		self.coordinates[0]['y'] = self.home_y
+		self.coordinates=nofly.main(self.coordinates)
+		fccount = 0
+		for index in range(len(self.coordinates)):
+			if(self.coordinates[index]['delivery'] == -2):
+				fccount+=1
+			else:
+				fccount+=3
+		fccount-=3
+		self.progressbarcount.publish(fccount)
+		self.gui_status.publish("No fly zone avoidance successfull, Ready to start Delivery")
 
 
 ###########################################################   SUBSCRIBER FUNCTIONS    ###################################################	
@@ -265,7 +289,9 @@ class pilot():
 
 	def set_guicommand(self,msg):
 		#print(msg.data) 
-		self.startend = msg.data 	# 1 for start , 0 for land ,-1 for call back
+		self.startend = msg.data 	# 1 for start , 0 for land ,-1 for call back , 9 for no fly zone avoidance
+		if(self.startend == 9):
+			self.check_noflyzone()
 		if(self.startend == 0):
 			self.takeoffland=-1
 			self.gui_status.publish("Emergency !!! Landing now")
