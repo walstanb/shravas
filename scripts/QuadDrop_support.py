@@ -239,9 +239,11 @@ def scal(x,y):
 	return x*top.sca+(top.fcan/2),(-1*y)*top.sca+(top.fcan/2)
 
 def draw_deliv():
-	x,y,nr=3.2,4.5,3.0
+	x,y,nr=3.0,0.5,1.4
+
 	x,y=scal(float(x),float(y))
-	top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#ff0000", width=nr)
+	nr=100*nr
+	top.XYPositionalData.create_oval(x-nr, y-nr, x+nr, y+nr,outline="#ff0000", width=2)
 	for i in range(1,len(ls)-1):
 		x,y=scal(float(ls[i]['x']),float(ls[i]['y']))
 		top.XYPositionalData.create_oval(x-15, y-15, x+15, y+15,outline="#0078ff", width=2)
@@ -375,6 +377,8 @@ class Gui():
 		top.WhyconCoords.configure(state='normal')
 		top.WhyconCoords.insert('end',"Current Whycon Coordinates\n- - - - - - - - - - - - - - - - - - - - - - - -\n")
 		top.WhyconCoords.configure(state='disabled')
+
+		draw_deliv()
 	
 	def calc_fac(msg):
 		if (self.fac==0):
