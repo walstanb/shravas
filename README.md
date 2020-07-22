@@ -7,7 +7,9 @@ DJI Tello Automated Delivery flight controller.
 - Platform used: Robot Operating System on Ubuntu 16.04
 - Libraries used: OpenCV, Numpy, ROSpy, Whycon, Tellopy
 - Other hardware requirements: Whycon camera (overhed mounted), Computer (minimum Intel Core i5
-recommended)
+recommended)/
+
+Please install all dependencies before execution
 
 Clone using:
 ```sh
