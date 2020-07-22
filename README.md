@@ -19,10 +19,8 @@ Execute:
 roslaunch shravas shravas.launch
 python QuadDrop.py
 ```
-<a href="https://www.youtube.com/watch?v=3ZpPeTD-Gtk" target="_blank"><img src="http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
-[![](http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")
+[![](http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")\
 https://www.youtube.com/watch?v=3ZpPeTD-Gtk
  
 **![](https://lh6.googleusercontent.com/jxIRr7h1CGWM1juQs6QcfnN04Cgam8tDavs61m5kvXAbaa6L2Etmb0C_cIjhtjthoJCOd1jKm5F_kc0cSeUW0nzeENxKY6CPeBmKkPxDtvjcGJbeYTkr1PxTbGvkh_3i_IyqjSYQyVA)**
