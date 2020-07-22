@@ -3,13 +3,9 @@
 DJI Tello Automated Delivery flight controller. 
 
 Drone Used: DJI Tello
-
 Development language: Python
-
 Platform used: Robot Operating System on Ubuntu 16.04
-
 Libraries used: OpenCV, Numpy, ROSpy, Whycon, Tellopy
-
 Other hardware requirements: Whycon camera (overhed mounted), Computer (minimum Intel Core i5
 recommended)
  
