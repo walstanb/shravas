@@ -1,5 +1,8 @@
 # QuadDrop / shravas
 
+[![](http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")\
+https://www.youtube.com/watch?v=3ZpPeTD-Gtk
+
 DJI Tello Automated Delivery flight controller.
 
 - Drone Used: DJI Tello
@@ -22,9 +25,7 @@ roslaunch shravas shravas.launch
 python QuadDrop.py
 ```
 
-[![](http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")\
-https://www.youtube.com/watch?v=3ZpPeTD-Gtk
- 
+
 **![](https://lh6.googleusercontent.com/jxIRr7h1CGWM1juQs6QcfnN04Cgam8tDavs61m5kvXAbaa6L2Etmb0C_cIjhtjthoJCOd1jKm5F_kc0cSeUW0nzeENxKY6CPeBmKkPxDtvjcGJbeYTkr1PxTbGvkh_3i_IyqjSYQyVA)**
 
 
