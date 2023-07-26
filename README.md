@@ -4,9 +4,10 @@
 
 https://github.com/walstanb/shravas/assets/38958184/d650f176-a3d4-4d3a-978c-c6a67a309c3c
 
+https://github.com/walstanb/shravas/blob/master/demo/sim-video-gif.gif?raw=true
 
 
-[![](http://img.youtube.com/vi/3ZpPeTD-Gtk/0.jpg)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")\
+[![](http://github.com/walstanb/shravas/blob/master/demo/sim-video-gif.gif?raw=true)](http://www.youtube.com/watch?v=3ZpPeTD-Gtk "QuadDrop Demonstration")\
 https://www.youtube.com/watch?v=3ZpPeTD-Gtk
 
 DJI Tello Automated Delivery flight controller.
